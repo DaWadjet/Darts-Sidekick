@@ -1,11 +1,23 @@
 "use client";
-import { Multiplier, SEGMENTS } from "@/app/lib/types";
+import { clsxm } from "@/app/lib/clsxm";
+import { Multiplier, SEGMENTS, ThrowValue } from "@/app/lib/types";
 import {
   useCurrentPlayer,
   useGameStore,
   usePlayers,
 } from "@/app/store/GameProvider";
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
+
+const throwValueToString = (throwValue: ThrowValue | null) => {
+  if (throwValue === "MISS") return "miss";
+  if (!throwValue) return "?";
+  if (throwValue.segment === "OUTER_BULL") return "25";
+  if (throwValue.segment === "BULLSEYE") return "50";
+  if (!("multiplier" in throwValue)) throw new Error("Invalid throw value");
+  return `${
+    throwValue.multiplier === 2 ? "D" : throwValue.multiplier === 3 ? "T" : ""
+  }${throwValue.segment}`;
+};
 
 const Game: FC = () => {
   const [multiplier, setMultiplier] = useState<Multiplier>(1);
@@ -30,15 +42,30 @@ const Game: FC = () => {
       <div className="grow" />
       {isGameStarted ? (
         <>
-          <div className="flex gap-2">
+          <div className="flex gap-2 w-full">
             {players.map((player) => (
               <div
                 key={player.id}
-                className={`h-10 w-10 bg-gray-500 rounded-md shadow-md ${
-                  player.id === currentPlayer.id ? "bg-red-500" : ""
-                }`}
+                className={clsxm(
+                  "flex-1 w-full rounded-md shadow-md",
+                  player.id === currentPlayer.id ? "bg-gray-500" : "bg-gray-200"
+                )}
               >
                 {player.name}
+                <div>
+                  {player.history.map((batch, index) => (
+                    <div
+                      key={`${player.id}-${batch[0].id}`}
+                      className="flex gap-2"
+                    >
+                      {batch.map((throwResult, index) => (
+                        <div key={`${throwResult?.id}-${index}`}>
+                          {throwValueToString(throwResult?.throwValue ?? null)}
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                </div>
               </div>
             ))}
           </div>

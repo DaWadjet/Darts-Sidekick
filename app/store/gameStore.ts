@@ -46,13 +46,14 @@ type TActions = {
   addPlayer(name: string): void;
   removePlayer(playerId: string): void;
   setStartingPointAmount(amount: TState["startingPointAmount"]): void;
-  saveThrow(result: Omit<ThrowResult, "id">): boolean;
-  undoThrow(withoutRedoPossibility?: boolean): void;
+  saveThrow(result: Omit<ThrowResult, "id" | "resultedInBust">): boolean;
+  undoThrow(): void;
   redoThrow(): void;
   checkLegWinCondition(): boolean;
   persistGameStatistics(): void;
   saveThrowToPlayerHistory(throwResult: ThrowResult): void;
   undoThrowFromPlayerHistory(lastThrow: ThrowResult): void;
+  getScoredPointsOfPlayer(playerId: string): number;
 };
 
 const initialState: TState = {
@@ -71,14 +72,23 @@ export const createGameStore = () =>
       persist(
         immer((set, get) => ({
           ...initialState,
-          reset: () =>
+          reset: () => {
             set(
               (state) => {
-                state = { ...state, ...initialState };
+                state = {
+                  ...state,
+                  ...initialState,
+                  players: [],
+                  savedResultsStack: [],
+                  redoResultsStack: [],
+                };
               },
-              false,
+              true,
               "reset"
-            ),
+            );
+            localStorage.removeItem("Game Store");
+          },
+
           addPlayer: (name) =>
             set(
               (state) => {
@@ -113,21 +123,23 @@ export const createGameStore = () =>
           },
           saveThrow: (result) => {
             const newId = throwIdGenerator.next();
-            const throwResult = { ...result, id: newId.value! };
+            const throwResult = {
+              ...result,
+              id: newId.value!,
+              resultedInBust: false,
+            };
             set((state) => {
               state.savedResultsStack.push(throwResult);
             });
             get().saveThrowToPlayerHistory(throwResult);
             return get().checkLegWinCondition();
           },
-          undoThrow: (withoutRedoPossibility = false) => {
+          undoThrow: () => {
             set(
               (state) => {
                 const lastThrow = state.savedResultsStack.pop();
                 if (lastThrow) {
-                  if (!withoutRedoPossibility) {
-                    state.redoResultsStack.push(lastThrow);
-                  }
+                  state.redoResultsStack.push(lastThrow);
                   state.players
                     .find((p) => p.id === lastThrow.scoredBy.id)!
                     .history.pop();
@@ -157,16 +169,7 @@ export const createGameStore = () =>
             const player = get().players.find(
               (p) => p.id === lastThrow.scoredBy.id
             )!;
-            const scoredPoints = player.history.reduce(
-              (acc, batch) =>
-                acc +
-                batch.reduce((batchAcc, item) => {
-                  if (!item || item.resultedInBust) return batchAcc;
-
-                  return batchAcc + getPointsScoredWithThrow(item.throwValue);
-                }, 0),
-              0
-            );
+            const scoredPoints = get().getScoredPointsOfPlayer(player.id);
             if (get().startingPointAmount - scoredPoints > 0) {
               return false;
             }
@@ -252,6 +255,19 @@ export const createGameStore = () =>
               );
               return;
             }
+          },
+          getScoredPointsOfPlayer: (playerId) => {
+            return get()
+              .players.find((p) => p.id === playerId)!
+              .history.reduce(
+                (acc, batch) =>
+                  acc +
+                  batch.reduce((batchAcc, item) => {
+                    if (!item || item.resultedInBust) return batchAcc;
+                    return batchAcc + getPointsScoredWithThrow(item.throwValue);
+                  }, 0),
+                0
+              );
           },
         })),
         { name: "Game Store" }
