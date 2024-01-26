@@ -6,7 +6,7 @@ export type Segment = (typeof SEGMENTS)[number];
 
 type Multiplier = 1 | 2 | 3;
 
-type SegmentValue =
+export type SegmentValue =
   | {
       segment: Segment;
       multiplier: Multiplier;
