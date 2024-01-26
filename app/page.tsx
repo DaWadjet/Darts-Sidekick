@@ -6,7 +6,7 @@ import {
   useGameStore,
   usePlayers,
 } from "@/app/store/GameProvider";
-import { FC, useCallback, useEffect, useMemo, useState } from "react";
+import { FC, useCallback, useMemo, useState } from "react";
 
 const throwValueToString = (throwValue: ThrowValue | null) => {
   if (throwValue === "MISS") return "miss";
@@ -22,7 +22,7 @@ const throwValueToString = (throwValue: ThrowValue | null) => {
 const Game: FC = () => {
   const [multiplier, setMultiplier] = useState<Multiplier>(1);
   const [isGameStarted, setIsGameStarted] = useState(false);
-  const possibleValues = useMemo(() => SEGMENTS.toSorted(), []);
+  const possibleValues = useMemo(() => SEGMENTS.toSorted(), [SEGMENTS]);
 
   const store = useGameStore()();
   const currentPlayer = useCurrentPlayer();
@@ -34,6 +34,7 @@ const Game: FC = () => {
     store.addPlayer("Player 3");
 
     store.setStartingPointAmount(701);
+    //@react-hooks/exhaustive-deps
   }, []);
 
   return (
