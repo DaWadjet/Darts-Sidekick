@@ -1,6 +1,6 @@
 "use client";
 
-import { SEGMENTS, Segment, SegmentValue } from "@/lib/types";
+import { SEGMENTS, Segment, SegmentValue } from "@/app/lib/types";
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
 
 const SEGMENT_ANGLE = Math.PI / SEGMENTS.length;

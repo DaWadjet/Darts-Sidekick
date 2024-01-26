@@ -4,7 +4,7 @@ export const SEGMENTS = [
 
 export type Segment = (typeof SEGMENTS)[number];
 
-type Multiplier = 1 | 2 | 3;
+export type Multiplier = 1 | 2 | 3;
 
 export type SegmentValue =
   | {
