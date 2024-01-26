@@ -22,7 +22,10 @@ const throwValueToString = (throwValue: ThrowValue | null) => {
 const Game: FC = () => {
   const [multiplier, setMultiplier] = useState<Multiplier>(1);
   const [isGameStarted, setIsGameStarted] = useState(false);
-  const possibleValues = useMemo(() => SEGMENTS.toSorted(), [SEGMENTS]);
+  const possibleValues = useMemo(
+    () => SEGMENTS.slice().sort((a, b) => a - b),
+    [SEGMENTS]
+  );
 
   const store = useGameStore()();
   const currentPlayer = useCurrentPlayer();
