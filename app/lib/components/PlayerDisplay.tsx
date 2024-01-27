@@ -1,7 +1,7 @@
-import { clsxm } from "@/app/lib/clsxm";
 import { getPointsScoredInBatch, throwValueToString } from "@/app/lib/utils";
-import { useThrowCount } from "@/app/store/GameProvider";
-import { BatchOfThrows, Player } from "@/app/store/gameStore";
+import { cn } from "@/lib/utils";
+import { useThrowCount } from "@/store/GameProvider";
+import { BatchOfThrows, Player } from "@/store/gameStore";
 import { FC, useEffect, useMemo, useRef } from "react";
 
 const PlayerDisplay: FC<{
@@ -21,7 +21,8 @@ const PlayerDisplay: FC<{
             id: "dummybatch",
             busted: false,
           },
-    [throwCount]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [player.history, throwCount]
   );
   useEffect(() => {
     if (isCurrentPlayer) {
@@ -44,7 +45,7 @@ const PlayerDisplay: FC<{
       ref={divRef}
     >
       <div
-        className={clsxm(
+        className={cn(
           "absolute top-0 bottom-0 left-0 transition-all duration-100 w-2.5",
           isCurrentPlayer ? "bg-green-500" : "bg-slate-800"
         )}

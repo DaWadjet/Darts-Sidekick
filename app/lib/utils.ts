@@ -1,5 +1,5 @@
 import { SegmentValue, ThrowValue } from "@/app/lib/types";
-import { BatchOfThrows } from "@/app/store/gameStore";
+import { BatchOfThrows } from "@/store/gameStore";
 
 export const throwValueToString = (throwValue: ThrowValue | null) => {
   if (!throwValue) return "";

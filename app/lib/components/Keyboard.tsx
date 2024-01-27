@@ -1,12 +1,26 @@
-import { clsxm } from "@/app/lib/clsxm";
+"use client";
+
 import { Multiplier, SEGMENTS } from "@/app/lib/types";
+import { cn } from "@/lib/utils";
 import {
   useCanRedo,
   useCanUndo,
   useCurrentPlayer,
   useGameActions,
-} from "@/app/store/GameProvider";
+} from "@/store/GameProvider";
 import { FC, useMemo, useState } from "react";
+
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const Keyboard: FC = () => {
   const actions = useGameActions();
@@ -15,7 +29,7 @@ const Keyboard: FC = () => {
   const canUndo = useCanUndo();
   const possibleValues = useMemo(
     () => SEGMENTS.slice().sort((a, b) => a - b),
-    [SEGMENTS]
+    []
   );
   const prefix = useMemo(
     () => (multiplier === 1 ? "" : multiplier === 2 ? "D" : "T"),
@@ -92,7 +106,7 @@ const Keyboard: FC = () => {
           0
         </button>
         <button
-          className={clsxm(
+          className={cn(
             "rounded-sm transition-all aspect-square duration-200 text-white font-semibold text-base leading-0",
             multiplier === 2 ? "bg-purple-800" : "bg-yellow-600"
           )}
@@ -107,7 +121,7 @@ const Keyboard: FC = () => {
           x2
         </button>
         <button
-          className={clsxm(
+          className={cn(
             "rounded-sm transition-all aspect-square  duration-200 text-white font-semibold text-base leading-0",
             multiplier === 3 ? "bg-purple-800" : "bg-amber-600"
           )}
@@ -139,13 +153,26 @@ const Keyboard: FC = () => {
           <div />
         )}
         <div />
-
-        <button
-          className="bg-red-800 rounded-sm aspect-square text-white font-semibold text-base leading-0"
-          onClick={actions.reset}
-        >
-          Reset
-        </button>
+        <AlertDialog>
+          <AlertDialogTrigger className="bg-red-800 rounded-sm aspect-square text-white font-semibold text-base leading-0">
+            Reset
+          </AlertDialogTrigger>
+          <AlertDialogContent className="">
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action will remove all players and all throws. Do you want
+                to continue?
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={actions.reset}>
+                Continue
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );

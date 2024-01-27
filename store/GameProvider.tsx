@@ -1,14 +1,14 @@
 "use client";
 
-import { createGameStore } from "@/app/store/gameStore";
+import { createGameStore } from "@/store/gameStore";
 import {
-  useState,
-  createContext,
-  useContext,
-  PropsWithChildren,
   FC,
+  PropsWithChildren,
+  createContext,
   useCallback,
+  useContext,
   useMemo,
+  useState,
 } from "react";
 
 const GameContext = createContext<ReturnType<typeof createGameStore> | null>(
@@ -46,7 +46,8 @@ export const usePlayers = () => {
           remainingScore,
         };
       }),
-    [players, getPlayerScore, amountOfThrows]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [players, getPlayerScore, startingPointAmount, amountOfThrows]
   );
 };
 
