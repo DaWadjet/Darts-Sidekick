@@ -1,32 +1,35 @@
 import { clsxm } from "@/app/lib/clsxm";
-import { getPointsScoredWithThrow, throwValueToString } from "@/app/lib/utils";
-import { Player } from "@/app/store/gameStore";
+import {
+  getPointsScoredInBatch,
+  getPointsScoredWithThrow,
+  throwValueToString,
+} from "@/app/lib/utils";
+import { useThrowCount } from "@/app/store/GameProvider";
+import { BatchOfThrows, Player } from "@/app/store/gameStore";
+import { get } from "lodash";
 import { FC, useMemo } from "react";
 
 const PlayerDisplay: FC<{
   player: Player & { remainingScore: number };
   isCurrentPlayer: boolean;
 }> = ({ player, isCurrentPlayer }) => {
-  const currentBatch = useMemo(
+  const throwCount = useThrowCount();
+  const currentBatch = useMemo<BatchOfThrows>(
     () =>
       player.history.length
         ? player.history[player.history.length - 1]
-        : [null, null, null],
-    [
-      player.history.flatMap(
-        (batch) => batch.map((throwResult) => throwResult).length
-      ),
-    ]
+        : {
+            throw1: null,
+            throw2: null,
+            throw3: null,
+            id: "dummybatch",
+            busted: false,
+          },
+    [throwCount]
   );
 
   const pointsScoredInBatch = useMemo(
-    () =>
-      currentBatch.reduce(
-        (acc, curr) =>
-          acc +
-          (curr?.throwValue ? getPointsScoredWithThrow(curr.throwValue) : 0),
-        0
-      ),
+    () => getPointsScoredInBatch(currentBatch),
     [currentBatch]
   );
 
@@ -48,14 +51,15 @@ const PlayerDisplay: FC<{
       </div>
       <div className="flex flex-col gap-3 flex-1 justify-start items-center">
         <div className="flex gap-0.5 items-center justify-center">
-          {currentBatch.map((throwResult, index) => (
-            <div
-              className="rounded-md text-sm bg-slate-900 shadow-inner size-9 grow-0 flex items-center justify-center text-white font-semibold leading-none"
-              key={`${index}-${player.id}`}
-            >
-              {throwValueToString(throwResult?.throwValue ?? null)}
-            </div>
-          ))}
+          <div className="rounded-md text-sm bg-slate-900 shadow-inner size-9 grow-0 flex items-center justify-center text-white font-semibold leading-none">
+            {throwValueToString(currentBatch.throw1?.throwValue ?? null)}
+          </div>
+          <div className="rounded-md text-sm bg-slate-900 shadow-inner size-9 grow-0 flex items-center justify-center text-white font-semibold leading-none">
+            {throwValueToString(currentBatch.throw2?.throwValue ?? null)}
+          </div>
+          <div className="rounded-md text-sm bg-slate-900 shadow-inner size-9 grow-0 flex items-center justify-center text-white font-semibold leading-none">
+            {throwValueToString(currentBatch.throw3?.throwValue ?? null)}
+          </div>
         </div>
         <p className="text-slate-500 text-xl font-extrabold">
           {pointsScoredInBatch}

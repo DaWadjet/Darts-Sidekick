@@ -21,6 +21,9 @@ export const useGameStore = () => {
   return useContext(GameContext)!;
 };
 
+export const useThrowCount = () =>
+  useGameStore()(useCallback((store) => store.savedResultsStack.length, []));
+
 export const useGameActions = () =>
   useGameStore()(useCallback((store) => store.actions, []));
 
@@ -29,9 +32,8 @@ export const usePlayers = () => {
   const startingPointAmount = useGameStore()(
     useCallback((store) => store.startingPointAmount, [])
   );
-  const amountOfThrows = useGameStore()(
-    useCallback((store) => store.savedResultsStack.length, [])
-  );
+  const amountOfThrows = useThrowCount();
+
   const getPlayerScore = useGameActions().getScoredPointsOfPlayer;
   return useMemo(
     () =>
@@ -50,25 +52,11 @@ export const usePlayers = () => {
 
 export const useCurrentPlayer = () => {
   const players = usePlayers();
-  const throwHistory = useGameStore()(
-    useCallback((store) => store.savedResultsStack, [])
+  const playerIndex = useGameStore()(
+    useCallback((store) => store.currentPlayerIndex, [])
   );
-  const playerToThrow = useMemo(() => {
-    if (throwHistory.length < 3) return players[0];
-    const lastThrowPlayer =
-      throwHistory[throwHistory.length - 1].scoredByPlayer;
-    const thirdLastThrow = throwHistory[throwHistory.length - 3].scoredByPlayer;
-    if (lastThrowPlayer === thirdLastThrow) {
-      const lastPlayer = players.find(
-        (player) => player.id === lastThrowPlayer
-      )!;
-      const playerIndex = players.indexOf(lastPlayer);
-      return players[(playerIndex + 1) % players.length];
-    }
-    return players.find((player) => player.id === lastThrowPlayer)!;
-  }, [throwHistory.length, players.length]);
 
-  return playerToThrow;
+  return players[playerIndex];
 };
 
 export const useCanRedo = () =>
