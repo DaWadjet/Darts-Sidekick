@@ -1,8 +1,9 @@
 import { SegmentValue, ThrowValue } from "@/app/lib/types";
+import { BatchOfThrows } from "@/app/store/gameStore";
 
 export const throwValueToString = (throwValue: ThrowValue | null) => {
-  if (throwValue === "MISS") return "miss";
-  if (!throwValue) return "?";
+  if (!throwValue) return "";
+  if (throwValue === "MISS") return "X";
   if (throwValue.segment === "OUTER_BULL") return "25";
   if (throwValue.segment === "BULLSEYE") return "50";
   if (!("multiplier" in throwValue)) throw new Error("Invalid throw value");
@@ -11,7 +12,10 @@ export const throwValueToString = (throwValue: ThrowValue | null) => {
   }${throwValue.segment}`;
 };
 
-export const getPointsScoredWithThrow = (throwResult: ThrowValue) => {
+export const getPointsScoredWithThrow = (
+  throwResult: ThrowValue | null | undefined
+) => {
+  if (!throwResult) return 0;
   if (throwResult === "MISS") {
     return 0;
   } else if (throwResult.segment === "OUTER_BULL") {
@@ -24,6 +28,13 @@ export const getPointsScoredWithThrow = (throwResult: ThrowValue) => {
   }
   return 0;
 };
+
+export const getPointsScoredInBatch = (batch: BatchOfThrows) =>
+  batch.busted
+    ? 0
+    : getPointsScoredWithThrow(batch.throw1?.throwValue) +
+      getPointsScoredWithThrow(batch.throw2?.throwValue) +
+      getPointsScoredWithThrow(batch.throw3?.throwValue);
 
 export const suggestDoubleOutPath = (
   startingPoint: keyof typeof cheatSheet
