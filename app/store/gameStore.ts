@@ -14,7 +14,7 @@ function* idGenerator(brand: string) {
 const playerIdGenerator = idGenerator("player");
 const throwIdGenerator = idGenerator("throw");
 
-type Player = {
+export type Player = {
   name: string;
   history: [ThrowResult, ThrowResult | null, ThrowResult | null][];
   id: string;
@@ -23,7 +23,7 @@ type Player = {
 };
 
 type ThrowResult = {
-  scoredBy: Player;
+  scoredByPlayer: string;
   throwValue: ThrowValue;
   resultedInBust: boolean;
   id: string;
@@ -68,208 +68,217 @@ const initialState: TState = {
 };
 
 export const createGameStore = () =>
-  create<TState & TActions>()(
+  create<TState & { actions: TActions }>()(
     devtools(
       persist(
         immer((set, get) => ({
           ...initialState,
-          reset: () => {
-            set(() => initialState, false, "reset");
-            localStorage.removeItem("Game Store");
-          },
-          startGame: () => {
-            set(
-              (state) => {
-                state.hasGameStarted = true;
-              },
-              false,
-              "startGame"
-            );
-          },
-          addPlayer: (name) =>
-            set(
-              (state) => {
-                const newId = playerIdGenerator.next();
-                state.players.push({
-                  id: newId.value!,
-                  history: [],
-                  name,
-                  legsWon: 0,
-                  setsWon: 0,
-                });
-              },
-              false,
-              "addPlayer"
-            ),
-          removePlayer: (playerId) =>
-            set(
-              (state) => {
-                state.players = state.players.filter((p) => p.id !== playerId);
-              },
-              false,
-              "removePlayer"
-            ),
-          setStartingPointAmount: (amount) => {
-            set(
-              (state) => {
-                state.startingPointAmount = amount;
-              },
-              false,
-              "setStartingPointAmount"
-            );
-          },
-          saveThrow: (result) => {
-            const newId = throwIdGenerator.next();
-            const throwResult = {
-              ...result,
-              id: newId.value!,
-              resultedInBust: false,
-            };
-            set((state) => {
-              state.savedResultsStack.push(throwResult);
-            });
-            get().saveThrowToPlayerHistory(throwResult);
-            return get().checkLegWinCondition();
-          },
-          undoThrow: () => {
-            const lastThrow = get().savedResultsStack.at(-1);
-            if (!lastThrow) return;
-            set(
-              (state) => {
-                state.savedResultsStack.pop();
-                if (lastThrow) {
-                  state.redoResultsStack.push(lastThrow);
-                }
-              },
-              false,
-              "undoThrow"
-            );
-            get().undoThrowFromPlayerHistory(lastThrow);
-          },
-          redoThrow: () => {
-            const lastThrow = get().redoResultsStack.at(-1);
-            if (!lastThrow) return;
+          actions: {
+            reset: () => {
+              set(() => initialState, false, "reset");
+              localStorage.removeItem("Game Store");
+            },
+            startGame: () => {
+              set(
+                (state) => {
+                  state.hasGameStarted = true;
+                },
+                false,
+                "startGame"
+              );
+            },
+            addPlayer: (name) =>
+              set(
+                (state) => {
+                  const newId = playerIdGenerator.next();
+                  state.players.push({
+                    id: newId.value!,
+                    history: [],
+                    name,
+                    legsWon: 0,
+                    setsWon: 0,
+                  });
+                },
+                false,
+                "addPlayer"
+              ),
+            removePlayer: (playerId) =>
+              set(
+                (state) => {
+                  state.players = state.players.filter(
+                    (p) => p.id !== playerId
+                  );
+                },
+                false,
+                "removePlayer"
+              ),
+            setStartingPointAmount: (amount) => {
+              set(
+                (state) => {
+                  state.startingPointAmount = amount;
+                },
+                false,
+                "setStartingPointAmount"
+              );
+            },
+            saveThrow: (result) => {
+              const newId = throwIdGenerator.next();
+              const throwResult = {
+                ...result,
+                id: newId.value!,
+                resultedInBust: false,
+              };
+              set((state) => {
+                state.savedResultsStack.push(throwResult);
+              });
+              get().actions.saveThrowToPlayerHistory(throwResult);
+              return get().actions.checkLegWinCondition();
+            },
+            undoThrow: () => {
+              const lastThrow = get().savedResultsStack.at(-1);
+              if (!lastThrow) return;
+              set(
+                (state) => {
+                  state.savedResultsStack.pop();
+                  if (lastThrow) {
+                    state.redoResultsStack.push(lastThrow);
+                  }
+                },
+                false,
+                "undoThrow"
+              );
+              get().actions.undoThrowFromPlayerHistory(lastThrow);
+            },
+            redoThrow: () => {
+              const lastThrow = get().redoResultsStack.at(-1);
+              if (!lastThrow) return;
 
-            set(
-              (state) => {
-                state.redoResultsStack.pop();
-                state.savedResultsStack.push(lastThrow);
-              },
-              false,
-              "redoThrow"
-            );
-            get().saveThrowToPlayerHistory(lastThrow);
-          },
-          checkLegWinCondition: () => {
-            const lastThrow =
-              get().savedResultsStack[get().savedResultsStack.length - 1];
-            if (!lastThrow || lastThrow.throwValue === "MISS") return false;
+              set(
+                (state) => {
+                  state.redoResultsStack.pop();
+                  state.savedResultsStack.push(lastThrow);
+                },
+                false,
+                "redoThrow"
+              );
+              get().actions.saveThrowToPlayerHistory(lastThrow);
+            },
+            checkLegWinCondition: () => {
+              const lastThrow =
+                get().savedResultsStack[get().savedResultsStack.length - 1];
+              if (!lastThrow || lastThrow.throwValue === "MISS") return false;
 
-            const player = get().players.find(
-              (p) => p.id === lastThrow.scoredBy.id
-            )!;
-            const scoredPoints = get().getScoredPointsOfPlayer(player.id);
-            if (get().startingPointAmount - scoredPoints > 0) {
-              return false;
-            }
+              const player = get().players.find(
+                (p) => p.id === lastThrow.scoredByPlayer
+              )!;
+              const scoredPoints = get().actions.getScoredPointsOfPlayer(
+                player.id
+              );
+              if (get().startingPointAmount - scoredPoints > 0) {
+                return false;
+              }
 
-            if (get().startingPointAmount - scoredPoints < 0) {
-              //TODO mark throws as bust
-              return false;
-            }
-            switch (get().endingStrategy) {
-              case "DOUBLE_OUT":
-                return (
-                  lastThrow.throwValue.segment === "BULLSEYE" ||
-                  ("multiplier" in lastThrow.throwValue &&
-                    lastThrow.throwValue.multiplier === 2)
+              if (get().startingPointAmount - scoredPoints < 0) {
+                //TODO mark throws as bust
+                return false;
+              }
+              switch (get().endingStrategy) {
+                case "DOUBLE_OUT":
+                  return (
+                    lastThrow.throwValue.segment === "BULLSEYE" ||
+                    ("multiplier" in lastThrow.throwValue &&
+                      lastThrow.throwValue.multiplier === 2)
+                  );
+                case "WIN_ON_ANY":
+                  return true;
+              }
+            },
+            persistGameStatistics: () => {},
+
+            saveThrowToPlayerHistory: (throwResult) => {
+              const player = get().players.find(
+                (p) => p.id === throwResult.scoredByPlayer
+              )!;
+              const lastHistoryBatch = player.history.at(-1);
+              if (!lastHistoryBatch || lastHistoryBatch.every(Boolean)) {
+                set(
+                  (state) => {
+                    state.players
+                      .find((p) => p.id === throwResult.scoredByPlayer)!
+                      .history.push([throwResult, null, null]);
+                  },
+                  false,
+                  "saveThrowToPlayerHistory"
                 );
-              case "WIN_ON_ANY":
-                return true;
-            }
-          },
-          persistGameStatistics: () => {},
-
-          saveThrowToPlayerHistory: (throwResult) => {
-            const player = get().players.find(
-              (p) => p.id === throwResult.scoredBy.id
-            )!;
-            const lastHistoryBatch = player.history.at(-1);
-            if (!lastHistoryBatch || lastHistoryBatch.every(Boolean)) {
+                return;
+              }
+              const firstMissingThowIndex = lastHistoryBatch.indexOf(null);
               set(
                 (state) => {
                   state.players
-                    .find((p) => p.id === throwResult.scoredBy.id)!
-                    .history.push([throwResult, null, null]);
+                    .find((p) => p.id === throwResult.scoredByPlayer)!
+                    .history.at(-1)![firstMissingThowIndex] = throwResult;
                 },
                 false,
                 "saveThrowToPlayerHistory"
               );
-              return;
-            }
-            const firstMissingThowIndex = lastHistoryBatch.indexOf(null);
-            set(
-              (state) => {
-                state.players
-                  .find((p) => p.id === throwResult.scoredBy.id)!
-                  .history.at(-1)![firstMissingThowIndex] = throwResult;
-              },
-              false,
-              "saveThrowToPlayerHistory"
-            );
-          },
+            },
 
-          undoThrowFromPlayerHistory: (lastThrow) => {
-            const player = get().players.find(
-              (p) => p.id === lastThrow.scoredBy.id
-            )!;
-            const lastHistoryBatch = player.history.at(-1);
-            if (!lastHistoryBatch) return;
+            undoThrowFromPlayerHistory: (lastThrow) => {
+              const player = get().players.find(
+                (p) => p.id === lastThrow.scoredByPlayer
+              )!;
+              const lastHistoryBatch = player.history.at(-1);
+              if (!lastHistoryBatch) return;
 
-            if (lastHistoryBatch[0].id === lastThrow.id) {
-              set(
-                (state) => {
-                  state.players
-                    .find((p) => p.id === lastThrow.scoredBy.id)!
-                    .history.pop();
-                },
-                true,
-                "undoThrowFromPlayerHistory"
-              );
-              return;
-            } else {
-              set(
-                (state) => {
-                  const history = state.players.find(
-                    (p) => p.id === lastThrow.scoredBy.id
-                  )!.history;
-                  const lastItemInHistory = history.at(-1)!;
+              if (lastHistoryBatch[0].id === lastThrow.id) {
+                set(
+                  (state) => {
+                    state.players
+                      .find((p) => p.id === lastThrow.scoredByPlayer)!
+                      .history.pop();
+                  },
+                  true,
+                  "undoThrowFromPlayerHistory"
+                );
+                return;
+              } else {
+                set(
+                  (state) => {
+                    const history = state.players.find(
+                      (p) => p.id === lastThrow.scoredByPlayer
+                    )!.history;
+                    const lastItemInHistory = history.at(-1)!;
 
-                  const index = lastItemInHistory.findIndex(
-                    (t) => t?.id === lastThrow.id
-                  );
-                  lastItemInHistory[index] = null;
-                },
-                false,
-                "undoThrowFromPlayerHistory"
-              );
-              return;
-            }
-          },
-          getScoredPointsOfPlayer: (playerId) => {
-            return get()
-              .players.find((p) => p.id === playerId)!
-              .history.reduce(
-                (acc, batch) =>
-                  acc +
-                  batch.reduce((batchAcc, item) => {
-                    if (!item || item.resultedInBust) return batchAcc;
-                    return batchAcc + getPointsScoredWithThrow(item.throwValue);
-                  }, 0),
-                0
-              );
+                    const index = lastItemInHistory.findIndex(
+                      (t) => t?.id === lastThrow.id
+                    );
+                    lastItemInHistory[index] = null;
+                  },
+                  false,
+                  "undoThrowFromPlayerHistory"
+                );
+                return;
+              }
+            },
+            getScoredPointsOfPlayer: (playerId) => {
+              return get()
+                .players.find((p) => p.id === playerId)!
+                .history.reduce(
+                  (acc, batch) =>
+                    acc +
+                    batch.reduce((batchAcc, item) => {
+                      if (!item || item.resultedInBust) return batchAcc;
+                      return (
+                        batchAcc + getPointsScoredWithThrow(item.throwValue)
+                      );
+                    }, 0),
+                  0
+                );
+            },
           },
         })),
+
         { name: "Game Store" }
       ),
       {

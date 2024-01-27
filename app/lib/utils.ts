@@ -1,8 +1,8 @@
 import { SegmentValue, ThrowValue } from "@/app/lib/types";
 
 export const throwValueToString = (throwValue: ThrowValue | null) => {
-  if (throwValue === "MISS") return "miss";
-  if (!throwValue) return "?";
+  if (!throwValue) return "";
+  if (throwValue === "MISS") return "X";
   if (throwValue.segment === "OUTER_BULL") return "25";
   if (throwValue.segment === "BULLSEYE") return "50";
   if (!("multiplier" in throwValue)) throw new Error("Invalid throw value");
