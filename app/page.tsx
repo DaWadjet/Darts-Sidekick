@@ -1,6 +1,7 @@
 "use client";
 import { clsxm } from "@/app/lib/clsxm";
 import { Multiplier, SEGMENTS, ThrowValue } from "@/app/lib/types";
+import { throwValueToString } from "@/app/lib/utils";
 import {
   useCurrentPlayer,
   useGameStore,
@@ -8,20 +9,9 @@ import {
 } from "@/app/store/GameProvider";
 import { FC, useCallback, useMemo, useState } from "react";
 
-const throwValueToString = (throwValue: ThrowValue | null) => {
-  if (throwValue === "MISS") return "miss";
-  if (!throwValue) return "?";
-  if (throwValue.segment === "OUTER_BULL") return "25";
-  if (throwValue.segment === "BULLSEYE") return "50";
-  if (!("multiplier" in throwValue)) throw new Error("Invalid throw value");
-  return `${
-    throwValue.multiplier === 2 ? "D" : throwValue.multiplier === 3 ? "T" : ""
-  }${throwValue.segment}`;
-};
-
 const Game: FC = () => {
   const [multiplier, setMultiplier] = useState<Multiplier>(1);
-  const [isGameStarted, setIsGameStarted] = useState(false);
+
   const possibleValues = useMemo(
     () => SEGMENTS.slice().sort((a, b) => a - b),
     [SEGMENTS]
@@ -37,6 +27,7 @@ const Game: FC = () => {
     store.addPlayer("Player 3");
 
     store.setStartingPointAmount(701);
+    store.startGame();
     //@react-hooks/exhaustive-deps
   }, []);
 
@@ -44,20 +35,20 @@ const Game: FC = () => {
     <main className="flex min-h-screen flex-col items-center gap-6 justify-center p-24">
       <h1 className="text-5xl font-bold">Darts</h1>
       <div className="grow" />
-      {isGameStarted ? (
+      {store.hasGameStarted ? (
         <>
           <div className="flex gap-2 w-full">
             {players.map((player) => (
               <div
                 key={player.id}
                 className={clsxm(
-                  "flex-1 w-full rounded-md shadow-md",
+                  "flex-1 w-full rounded-md shadow-md px-5",
                   player.id === currentPlayer.id ? "bg-gray-500" : "bg-gray-200"
                 )}
               >
-                {player.name}
-                <div>
-                  {player.history.map((batch, index) => (
+                <span className="line-clamp-1">{player.name}</span>
+                <div className="flex flex-col gap-1 items-start">
+                  {player.history.map((batch) => (
                     <div
                       key={`${player.id}-${batch[0].id}`}
                       className="flex gap-2"
@@ -70,6 +61,14 @@ const Game: FC = () => {
                     </div>
                   ))}
                 </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex gap-2 w-full flex-wrap">
+            {store.savedResultsStack.map((result) => (
+              <div key={`${result.id}`} className="flex gap-2">
+                {throwValueToString(result?.throwValue ?? null)}
               </div>
             ))}
           </div>
@@ -172,7 +171,6 @@ const Game: FC = () => {
               className="h-10 px-3 bg-gray-500 rounded-md shadow-md"
               onClick={() => {
                 store.reset();
-                setIsGameStarted(false);
               }}
             >
               Reset
@@ -186,7 +184,6 @@ const Game: FC = () => {
             className="h-10 px-3 bg-gray-500 rounded-md shadow-md"
             onClick={() => {
               store.reset();
-              setIsGameStarted(false);
             }}
           >
             Reset
@@ -195,7 +192,6 @@ const Game: FC = () => {
             key="start"
             className="h-10 px-3 bg-gray-500 rounded-md shadow-md"
             onClick={() => {
-              setIsGameStarted(true);
               setupDummyGame();
             }}
           >

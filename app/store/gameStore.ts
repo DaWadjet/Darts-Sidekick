@@ -1,7 +1,5 @@
-"use client";
-
 import { ThrowValue } from "@/app/lib/types";
-import { useGameStore } from "@/app/store/GameProvider";
+import { getPointsScoredWithThrow } from "@/app/lib/utils";
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
@@ -39,10 +37,12 @@ type TState = {
   redoResultsStack: ThrowResult[];
   legs: number;
   sets: number;
+  hasGameStarted: boolean;
 };
 
 type TActions = {
   reset(): void;
+  startGame(): void;
   addPlayer(name: string): void;
   removePlayer(playerId: string): void;
   setStartingPointAmount(amount: TState["startingPointAmount"]): void;
@@ -64,6 +64,7 @@ const initialState: TState = {
   legs: 3,
   sets: 0,
   endingStrategy: "DOUBLE_OUT",
+  hasGameStarted: false,
 };
 
 export const createGameStore = () =>
@@ -76,7 +77,15 @@ export const createGameStore = () =>
             set(() => initialState, false, "reset");
             localStorage.removeItem("Game Store");
           },
-
+          startGame: () => {
+            set(
+              (state) => {
+                state.hasGameStarted = true;
+              },
+              false,
+              "startGame"
+            );
+          },
           addPlayer: (name) =>
             set(
               (state) => {
@@ -123,25 +132,27 @@ export const createGameStore = () =>
             return get().checkLegWinCondition();
           },
           undoThrow: () => {
+            const lastThrow = get().savedResultsStack.at(-1);
+            if (!lastThrow) return;
             set(
               (state) => {
-                const lastThrow = state.savedResultsStack.pop();
+                state.savedResultsStack.pop();
                 if (lastThrow) {
                   state.redoResultsStack.push(lastThrow);
-                  state.players
-                    .find((p) => p.id === lastThrow.scoredBy.id)!
-                    .history.pop();
                 }
               },
               false,
               "undoThrow"
             );
+            get().undoThrowFromPlayerHistory(lastThrow);
           },
           redoThrow: () => {
-            const lastThrow = get().redoResultsStack.pop();
+            const lastThrow = get().redoResultsStack.at(-1);
             if (!lastThrow) return;
+
             set(
               (state) => {
+                state.redoResultsStack.pop();
                 state.savedResultsStack.push(lastThrow);
               },
               false,
@@ -163,6 +174,7 @@ export const createGameStore = () =>
             }
 
             if (get().startingPointAmount - scoredPoints < 0) {
+              //TODO mark throws as bust
               return false;
             }
             switch (get().endingStrategy) {
@@ -217,12 +229,11 @@ export const createGameStore = () =>
             if (lastHistoryBatch[0].id === lastThrow.id) {
               set(
                 (state) => {
-                  const history = state.players.find(
-                    (p) => p.id === lastThrow.scoredBy.id
-                  )!.history;
-                  history.pop();
+                  state.players
+                    .find((p) => p.id === lastThrow.scoredBy.id)!
+                    .history.pop();
                 },
-                false,
+                true,
                 "undoThrowFromPlayerHistory"
               );
               return;
@@ -233,6 +244,7 @@ export const createGameStore = () =>
                     (p) => p.id === lastThrow.scoredBy.id
                   )!.history;
                   const lastItemInHistory = history.at(-1)!;
+
                   const index = lastItemInHistory.findIndex(
                     (t) => t?.id === lastThrow.id
                   );
@@ -267,17 +279,3 @@ export const createGameStore = () =>
       }
     )
   );
-
-const getPointsScoredWithThrow = (throwResult: ThrowValue) => {
-  if (throwResult === "MISS") {
-    return 0;
-  } else if (throwResult.segment === "OUTER_BULL") {
-    return 25;
-  } else if (throwResult.segment === "BULLSEYE") {
-    return 50;
-  } else {
-    if ("multiplier" in throwResult)
-      return throwResult.segment * throwResult.multiplier;
-  }
-  return 0;
-};
