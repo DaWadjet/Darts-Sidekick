@@ -83,7 +83,7 @@ const initialState: TState = {
 export const createGameStore = () =>
   create<TState & { actions: TActions }>()(
     devtools(
-      // persist(
+      // persist( //TODO re-enable middleware after the store's development is finished
       immer((set, get) => ({
         ...initialState,
         actions: {

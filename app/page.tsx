@@ -46,6 +46,12 @@ const Game: FC = () => {
         </>
       ) : (
         <>
+          <h1 className="text-white font-bold text-3xl">Disclaimer</h1>
+          <h2 className="text-center text-2xl font-bold text-slate-600">
+            This project is still actively under development. I use it to learn
+            Next.js-related patterns and in the meantime create something
+            useful.
+          </h2>
           <button
             key="reset"
             className="h-10 px-3 bg-gray-500 rounded-md shadow-md"
