@@ -164,7 +164,7 @@ const Game: FC = () => {
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Legs" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="max-h-72">
                   {LEGS_POSSIBILITIES.map((value) => (
                     <SelectItem key={value} value={value.toString()}>
                       {value === 1 ? "1 leg" : `${value} legs`}
@@ -199,7 +199,11 @@ const Game: FC = () => {
               <SheetHeader>
                 <SheetTitle>Add new player</SheetTitle>
               </SheetHeader>
-              <Input placeholder="Player name" ref={newPlayerInputRef} />
+              <Input
+                placeholder="Player name"
+                ref={newPlayerInputRef}
+                autoFocus
+              />
 
               <SheetFooter>
                 <SheetClose asChild>

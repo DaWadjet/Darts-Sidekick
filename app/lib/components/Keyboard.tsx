@@ -8,7 +8,7 @@ import {
   useCurrentPlayer,
   useGameActions,
 } from "@/store/GameProvider";
-import { FC, useMemo, useState } from "react";
+import { FC, useCallback, useMemo, useState } from "react";
 
 import {
   AlertDialog,
@@ -37,6 +37,12 @@ const Keyboard: FC = () => {
   );
   const currentPlayer = useCurrentPlayer();
 
+  const vibrate = useCallback(() => {
+    if (typeof window !== "undefined" && "vibrate" in window.navigator) {
+      window.navigator.vibrate(100);
+    }
+  }, []);
+
   return (
     <div className="w-full">
       <div className="grid grid-cols-7 gap-1">
@@ -45,6 +51,7 @@ const Keyboard: FC = () => {
             key={segment}
             className="bg-slate-800 rounded-sm aspect-square text-white font-semibold text-base leading-0"
             onClick={() => {
+              vibrate();
               actions.saveThrow({
                 scoredByPlayer: currentPlayer.id,
                 throwValue: {
@@ -63,6 +70,7 @@ const Keyboard: FC = () => {
           <button
             className="bg-slate-800 rounded-sm aspect-square text-white font-semibold text-base leading-0"
             onClick={() => {
+              vibrate();
               actions.saveThrow({
                 scoredByPlayer: currentPlayer.id,
                 throwValue: {
@@ -79,6 +87,7 @@ const Keyboard: FC = () => {
             key="bullseye"
             className="bg-slate-800 rounded-sm aspect-square text-white font-semibold text-base leading-0"
             onClick={() => {
+              vibrate();
               actions.saveThrow({
                 scoredByPlayer: currentPlayer.id,
                 throwValue: {
@@ -96,6 +105,7 @@ const Keyboard: FC = () => {
         <button
           className="bg-slate-800 rounded-sm aspect-square text-white font-semibold text-base leading-0"
           onClick={() => {
+            vibrate();
             actions.saveThrow({
               scoredByPlayer: currentPlayer.id,
               throwValue: "MISS",
@@ -111,6 +121,7 @@ const Keyboard: FC = () => {
             multiplier === 2 ? "bg-purple-800" : "bg-yellow-600"
           )}
           onClick={() => {
+            vibrate();
             if (multiplier === 2) {
               setMultiplier(1);
             } else {
@@ -126,6 +137,7 @@ const Keyboard: FC = () => {
             multiplier === 3 ? "bg-purple-800" : "bg-amber-600"
           )}
           onClick={() => {
+            vibrate();
             if (multiplier === 3) {
               setMultiplier(1);
             } else {
@@ -138,14 +150,20 @@ const Keyboard: FC = () => {
         <button
           disabled={!canUndo}
           className="bg-orange-700 rounded-sm aspect-square text-white font-semibold transition-all duration-200 text-base leading-0 disabled:opacity-50 disabled:cursor-not-allowed"
-          onClick={actions.undoThrow}
+          onClick={() => {
+            vibrate();
+            actions.undoThrow();
+          }}
         >
           Undo
         </button>
         {canRedo ? (
           <button
             className="bg-green-700 rounded-sm aspect-square text-white font-semibold transition-all duration-200 text-base leading-0"
-            onClick={actions.redoThrow}
+            onClick={() => {
+              vibrate();
+              actions.redoThrow();
+            }}
           >
             Redo
           </button>
@@ -154,10 +172,13 @@ const Keyboard: FC = () => {
         )}
         <div />
         <AlertDialog>
-          <AlertDialogTrigger className="bg-red-800 rounded-sm aspect-square text-white font-semibold text-base leading-0">
+          <AlertDialogTrigger
+            className="bg-red-800 rounded-sm aspect-square text-white font-semibold text-base leading-0"
+            onClick={vibrate}
+          >
             Reset
           </AlertDialogTrigger>
-          <AlertDialogContent className="">
+          <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Are you sure?</AlertDialogTitle>
               <AlertDialogDescription>
@@ -167,7 +188,12 @@ const Keyboard: FC = () => {
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={actions.reset}>
+              <AlertDialogAction
+                onClick={() => {
+                  vibrate();
+                  actions.reset();
+                }}
+              >
                 Continue
               </AlertDialogAction>
             </AlertDialogFooter>
