@@ -1,12 +1,7 @@
 import { clsxm } from "@/app/lib/clsxm";
-import {
-  getPointsScoredInBatch,
-  getPointsScoredWithThrow,
-  throwValueToString,
-} from "@/app/lib/utils";
+import { getPointsScoredInBatch, throwValueToString } from "@/app/lib/utils";
 import { useThrowCount } from "@/app/store/GameProvider";
 import { BatchOfThrows, Player } from "@/app/store/gameStore";
-import { get } from "lodash";
 import { FC, useMemo } from "react";
 
 const PlayerDisplay: FC<{
