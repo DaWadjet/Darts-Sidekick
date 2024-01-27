@@ -73,19 +73,7 @@ export const createGameStore = () =>
         immer((set, get) => ({
           ...initialState,
           reset: () => {
-            set(
-              (state) => {
-                state = {
-                  ...state,
-                  ...initialState,
-                  players: [],
-                  savedResultsStack: [],
-                  redoResultsStack: [],
-                };
-              },
-              true,
-              "reset"
-            );
+            set(() => initialState, false, "reset");
             localStorage.removeItem("Game Store");
           },
 
