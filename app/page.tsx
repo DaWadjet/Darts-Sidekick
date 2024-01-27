@@ -1,14 +1,13 @@
 "use client";
 import Keyboard from "@/app/lib/components/Keyboard";
 import PlayerDisplay from "@/app/lib/components/PlayerDisplay";
-import { Multiplier, SEGMENTS } from "@/app/lib/types";
 import {
   useCurrentPlayer,
   useGameActions,
   useGameStore,
   usePlayers,
 } from "@/app/store/GameProvider";
-import { FC, useCallback, useMemo, useState } from "react";
+import { FC, useCallback } from "react";
 
 const Game: FC = () => {
   const actions = useGameActions();
@@ -22,14 +21,15 @@ const Game: FC = () => {
     actions.addPlayer("Player 1");
     actions.addPlayer("Player 2");
     actions.addPlayer("Player 3");
-
+    actions.addPlayer("Player 4");
+    actions.addPlayer("Player 5");
     actions.setStartingPointAmount(701);
     actions.startGame();
     //@react-hooks/exhaustive-deps
   }, []);
 
   return (
-    <main className="flex min-h-screen flex-col bg-black items-center gap-6 justify-center container p-3">
+    <main className="flex h-[100svh] flex-col mx-auto items-center gap-6 justify-center container p-3">
       <h1 className="text-5xl font-extrabold text-white">Darts</h1>
       {hasGameStarted ? (
         <>
