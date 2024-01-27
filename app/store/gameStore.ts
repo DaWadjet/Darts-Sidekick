@@ -1,11 +1,7 @@
 import { ThrowValue } from "@/app/lib/types";
-import {
-  getPointsScoredInBatch,
-  getPointsScoredWithThrow,
-} from "@/app/lib/utils";
-import { Dictionary, get } from "lodash";
+import { getPointsScoredInBatch } from "@/app/lib/utils";
 import { create } from "zustand";
-import { devtools, persist } from "zustand/middleware";
+import { devtools } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 
 function* idGenerator(brand: string) {
