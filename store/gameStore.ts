@@ -1,5 +1,12 @@
-import { ThrowValue } from "@/app/lib/types";
+import {
+  Ending,
+  LegsAmount,
+  SetsAmount,
+  StartingPointAmount,
+  ThrowValue,
+} from "@/app/lib/types";
 import { getPointsScoredInBatch } from "@/app/lib/utils";
+import { toast } from "sonner";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
@@ -38,13 +45,13 @@ type ThrowResult = {
 };
 
 type TState = {
-  startingPointAmount: 101 | 301 | 501 | 701 | 1001;
-  endingStrategy: "DOUBLE_OUT" | "WIN_ON_ANY";
+  startingPointAmount: StartingPointAmount;
+  endingStrategy: Ending;
   players: Player[];
   savedResultsStack: ThrowResult[];
   redoResultsStack: ThrowResult[];
-  legs: number;
-  sets: number;
+  legs: LegsAmount;
+  sets: SetsAmount;
   hasGameStarted: boolean;
   currentPlayerIndex: number;
 };
@@ -54,6 +61,9 @@ type TActions = {
   startGame(): void;
   addPlayer(name: string): void;
   removePlayer(playerId: string): void;
+  setEndingStrategy(strategy: TState["endingStrategy"]): void;
+  setLegs(legs: TState["legs"]): void;
+  setSets(sets: TState["sets"]): void;
   setStartingPointAmount(amount: TState["startingPointAmount"]): void;
   saveThrow(result: Omit<ThrowResult, "id" | "resultedInBust">): boolean;
   undoThrow(): void;
@@ -70,7 +80,7 @@ const initialState: TState = {
   savedResultsStack: [],
   redoResultsStack: [],
   legs: 3,
-  sets: 0,
+  sets: 1,
   endingStrategy: "DOUBLE_OUT",
   hasGameStarted: false,
   currentPlayerIndex: 0,
@@ -88,6 +98,12 @@ export const createGameStore = () =>
             localStorage.removeItem("Game Store");
           },
           startGame: () => {
+            toast("Game Started", {
+              duration: 5000,
+              position: "bottom-right",
+              dismissible: true,
+            });
+
             if (!get().players.length) return;
             set(
               (state) => {
@@ -306,6 +322,30 @@ export const createGameStore = () =>
                 0
               );
           },
+          setEndingStrategy: (strategy) =>
+            set(
+              (state) => {
+                state.endingStrategy = strategy;
+              },
+              false,
+              "setEndingStrategy"
+            ),
+          setLegs: (legs) =>
+            set(
+              (state) => {
+                state.legs = legs;
+              },
+              false,
+              "setLegs"
+            ),
+          setSets: (sets) =>
+            set(
+              (state) => {
+                state.sets = sets;
+              },
+              false,
+              "setSets"
+            ),
         },
       })),
 

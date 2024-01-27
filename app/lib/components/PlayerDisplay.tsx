@@ -1,14 +1,15 @@
-import { clsxm } from "@/app/lib/clsxm";
 import { getPointsScoredInBatch, throwValueToString } from "@/app/lib/utils";
-import { useThrowCount } from "@/app/store/GameProvider";
-import { BatchOfThrows, Player } from "@/app/store/gameStore";
-import { FC, useMemo } from "react";
+import { cn } from "@/lib/utils";
+import { useThrowCount } from "@/store/GameProvider";
+import { BatchOfThrows, Player } from "@/store/gameStore";
+import { FC, useEffect, useMemo, useRef } from "react";
 
 const PlayerDisplay: FC<{
   player: Player & { remainingScore: number };
   isCurrentPlayer: boolean;
 }> = ({ player, isCurrentPlayer }) => {
   const throwCount = useThrowCount();
+  const divRef = useRef<HTMLDivElement>(null);
   const currentBatch = useMemo<BatchOfThrows>(
     () =>
       player.history.length
@@ -20,8 +21,18 @@ const PlayerDisplay: FC<{
             id: "dummybatch",
             busted: false,
           },
-    [throwCount]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [player.history, throwCount]
   );
+  useEffect(() => {
+    if (isCurrentPlayer) {
+      divRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+        inline: "nearest",
+      });
+    }
+  }, [isCurrentPlayer]);
 
   const pointsScoredInBatch = useMemo(
     () => getPointsScoredInBatch(currentBatch),
@@ -29,10 +40,13 @@ const PlayerDisplay: FC<{
   );
 
   return (
-    <div className="p-2 pl-4 overflow-clip relative flex flex-row items-start h-24 w-full bg-slate-800 gap-1 rounded-sm shadow-sm">
+    <div
+      className="p-2 pl-4 overflow-clip relative flex flex-row items-start h-24 w-full shrink-0 bg-slate-800 gap-1 rounded-sm shadow-sm"
+      ref={divRef}
+    >
       <div
-        className={clsxm(
-          "absolute top-0 bottom-0 left-0 transition-all duration-200 w-3",
+        className={cn(
+          "absolute top-0 bottom-0 left-0 transition-all duration-100 w-2.5",
           isCurrentPlayer ? "bg-green-500" : "bg-slate-800"
         )}
       />

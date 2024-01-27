@@ -1,7 +1,10 @@
+import { Toaster } from "@/components/ui/sonner";
+import { ThemeProvider } from "@/components/ui/theme-provider";
+import { cn } from "@/lib/utils";
+import GameProvider from "@/store/GameProvider";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import GameProvider from "@/app/store/GameProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -15,9 +18,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <GameProvider>
-        <body className={inter.className}>{children}</body>
+        <body className={cn(inter.className, "antialiased")}>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="dark"
+            enableSystem
+            disableTransitionOnChange
+          >
+            {children}
+            <Toaster />
+          </ThemeProvider>
+        </body>
       </GameProvider>
     </html>
   );

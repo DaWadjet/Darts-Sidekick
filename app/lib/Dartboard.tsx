@@ -84,7 +84,7 @@ const Dartboard: FC = () => {
       context.fill();
       context.stroke();
     },
-    [context, canvas, highlightedSection, relativeSize]
+    [context, canvas, highlightedSection]
   );
 
   const drawTripleSegment = useCallback(
@@ -225,7 +225,14 @@ const Dartboard: FC = () => {
       drawTripleSegment(segment, i);
     }
     drawBull();
-  }, [drawBull, drawDoubleSegment, context, canvas]);
+  }, [
+    context,
+    canvas,
+    drawFullSegment,
+    drawDoubleSegment,
+    drawTripleSegment,
+    drawBull,
+  ]);
 
   useEffect(() => {
     if (canDraw) {

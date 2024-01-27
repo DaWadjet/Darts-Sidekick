@@ -1,12 +1,26 @@
-import { clsxm } from "@/app/lib/clsxm";
+"use client";
+
 import { Multiplier, SEGMENTS } from "@/app/lib/types";
+import { cn } from "@/lib/utils";
 import {
   useCanRedo,
   useCanUndo,
   useCurrentPlayer,
   useGameActions,
-} from "@/app/store/GameProvider";
-import { FC, useMemo, useState } from "react";
+} from "@/store/GameProvider";
+import { FC, useCallback, useMemo, useState } from "react";
+
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const Keyboard: FC = () => {
   const actions = useGameActions();
@@ -15,13 +29,19 @@ const Keyboard: FC = () => {
   const canUndo = useCanUndo();
   const possibleValues = useMemo(
     () => SEGMENTS.slice().sort((a, b) => a - b),
-    [SEGMENTS]
+    []
   );
   const prefix = useMemo(
     () => (multiplier === 1 ? "" : multiplier === 2 ? "D" : "T"),
     [multiplier]
   );
   const currentPlayer = useCurrentPlayer();
+
+  const vibrate = useCallback(() => {
+    if (typeof window !== "undefined" && "vibrate" in window.navigator) {
+      window.navigator.vibrate(100);
+    }
+  }, []);
 
   return (
     <div className="w-full">
@@ -31,6 +51,7 @@ const Keyboard: FC = () => {
             key={segment}
             className="bg-slate-800 rounded-sm aspect-square text-white font-semibold text-base leading-0"
             onClick={() => {
+              vibrate();
               actions.saveThrow({
                 scoredByPlayer: currentPlayer.id,
                 throwValue: {
@@ -49,6 +70,7 @@ const Keyboard: FC = () => {
           <button
             className="bg-slate-800 rounded-sm aspect-square text-white font-semibold text-base leading-0"
             onClick={() => {
+              vibrate();
               actions.saveThrow({
                 scoredByPlayer: currentPlayer.id,
                 throwValue: {
@@ -65,6 +87,7 @@ const Keyboard: FC = () => {
             key="bullseye"
             className="bg-slate-800 rounded-sm aspect-square text-white font-semibold text-base leading-0"
             onClick={() => {
+              vibrate();
               actions.saveThrow({
                 scoredByPlayer: currentPlayer.id,
                 throwValue: {
@@ -82,6 +105,7 @@ const Keyboard: FC = () => {
         <button
           className="bg-slate-800 rounded-sm aspect-square text-white font-semibold text-base leading-0"
           onClick={() => {
+            vibrate();
             actions.saveThrow({
               scoredByPlayer: currentPlayer.id,
               throwValue: "MISS",
@@ -92,11 +116,12 @@ const Keyboard: FC = () => {
           0
         </button>
         <button
-          className={clsxm(
+          className={cn(
             "rounded-sm transition-all aspect-square duration-200 text-white font-semibold text-base leading-0",
             multiplier === 2 ? "bg-purple-800" : "bg-yellow-600"
           )}
           onClick={() => {
+            vibrate();
             if (multiplier === 2) {
               setMultiplier(1);
             } else {
@@ -107,11 +132,12 @@ const Keyboard: FC = () => {
           x2
         </button>
         <button
-          className={clsxm(
+          className={cn(
             "rounded-sm transition-all aspect-square  duration-200 text-white font-semibold text-base leading-0",
             multiplier === 3 ? "bg-purple-800" : "bg-amber-600"
           )}
           onClick={() => {
+            vibrate();
             if (multiplier === 3) {
               setMultiplier(1);
             } else {
@@ -124,14 +150,20 @@ const Keyboard: FC = () => {
         <button
           disabled={!canUndo}
           className="bg-orange-700 rounded-sm aspect-square text-white font-semibold transition-all duration-200 text-base leading-0 disabled:opacity-50 disabled:cursor-not-allowed"
-          onClick={actions.undoThrow}
+          onClick={() => {
+            vibrate();
+            actions.undoThrow();
+          }}
         >
           Undo
         </button>
         {canRedo ? (
           <button
             className="bg-green-700 rounded-sm aspect-square text-white font-semibold transition-all duration-200 text-base leading-0"
-            onClick={actions.redoThrow}
+            onClick={() => {
+              vibrate();
+              actions.redoThrow();
+            }}
           >
             Redo
           </button>
@@ -139,13 +171,34 @@ const Keyboard: FC = () => {
           <div />
         )}
         <div />
-
-        <button
-          className="bg-red-800 rounded-sm aspect-square text-white font-semibold text-base leading-0"
-          onClick={actions.reset}
-        >
-          Reset
-        </button>
+        <AlertDialog>
+          <AlertDialogTrigger
+            className="bg-red-800 rounded-sm aspect-square text-white font-semibold text-base leading-0"
+            onClick={vibrate}
+          >
+            Reset
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action will remove all players and all throws. Do you want
+                to continue?
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => {
+                  vibrate();
+                  actions.reset();
+                }}
+              >
+                Continue
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );
