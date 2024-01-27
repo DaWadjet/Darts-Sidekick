@@ -21,8 +21,28 @@ export const useGameStore = () => {
   return useContext(GameContext)!;
 };
 
-export const usePlayers = () =>
-  useGameStore()(useCallback((store) => store.players, []));
+export const usePlayers = () => {
+  const players = useGameStore()(useCallback((store) => store.players, []));
+  const startingPointAmount = useGameStore()(
+    useCallback((store) => store.startingPointAmount, [])
+  );
+  const getPlayerScore = useGameStore()(
+    useCallback((store) => store.getScoredPointsOfPlayer, [])
+  );
+  return useMemo(
+    () =>
+      players.map((player) => {
+        const score = getPlayerScore(player.id);
+        const remainingScore = startingPointAmount - score;
+        return {
+          ...player,
+          score,
+          remainingScore,
+        };
+      }),
+    [players, getPlayerScore]
+  );
+};
 
 export const useCurrentPlayer = () => {
   const players = usePlayers();
