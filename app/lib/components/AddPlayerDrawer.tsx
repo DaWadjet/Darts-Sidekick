@@ -68,7 +68,12 @@ const ProfileForm: FC<{ className?: string; toggleOpen: () => void }> = ({
     <form
       className={cn("flex flex-col justify-start items-start gap-4", className)}
     >
-      <Input placeholder="Player name" ref={newPlayerInputRef} />
+      <Input
+        placeholder="Player name"
+        className="text-base"
+        ref={newPlayerInputRef}
+        autoFocus
+      />
       <Button
         type="button"
         className="self-end"

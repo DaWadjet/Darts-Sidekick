@@ -30,7 +30,11 @@ const AddPlayerSheet: FC<{ side: "top" | "bottom" }> = ({ side }) => {
         <SheetHeader>
           <SheetTitle>Add new player</SheetTitle>
         </SheetHeader>
-        <Input placeholder="Player name" ref={newPlayerInputRef} />
+        <Input
+          placeholder="Player name"
+          ref={newPlayerInputRef}
+          className="text-base"
+        />
 
         <SheetFooter>
           <SheetClose asChild>
