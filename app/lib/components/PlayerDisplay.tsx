@@ -41,7 +41,7 @@ const PlayerDisplay: FC<{
 
   return (
     <div
-      className="p-2 pl-4 overflow-clip relative flex flex-row items-start h-24 w-full shrink-0 bg-slate-800 gap-1 rounded-sm shadow-sm"
+      className="p-2 my-2 pl-4 overflow-clip relative flex flex-row items-start h-24 w-full shrink-0 bg-slate-800 gap-1 rounded-sm shadow-sm"
       ref={divRef}
     >
       <div
