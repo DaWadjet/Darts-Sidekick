@@ -7,7 +7,7 @@ import {
   useGameStore,
   usePlayers,
 } from "@/store/GameProvider";
-import { FC, useCallback, useRef } from "react";
+import { FC, useCallback } from "react";
 
 import {
   Select,
@@ -23,27 +23,33 @@ import {
   STARTING_POINT_POSSIBILITIES,
 } from "@/app/lib/types";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+
+import AddPlayerDrawer from "@/app/lib/components/AddPlayerDrawer";
+import AddPlayerSheet from "@/app/lib/components/AddPlayerSheet";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
+import { ScrollArea, Scrollbar } from "@radix-ui/react-scroll-area";
+import { useDebounce, useToggle } from "react-use";
 
 const Game: FC = () => {
-  const newPlayerInputRef = useRef<HTMLInputElement>(null);
+  const [pointerEventsDebounced, togglePointerEventsDebounced] =
+    useToggle(false);
+  const [isSelectOpen, toggleSelectOpen] = useToggle(false);
+  useDebounce(
+    () => {
+      togglePointerEventsDebounced(isSelectOpen);
+    },
+    50,
+    [isSelectOpen]
+  );
+
   const actions = useGameActions();
   const startingPointAmount = useGameStore()(
     useCallback((store) => store.startingPointAmount, [])
@@ -59,24 +65,12 @@ const Game: FC = () => {
   const currentPlayer = useCurrentPlayer();
   const players = usePlayers();
 
-  const setupDummyGame = useCallback(() => {
-    actions.addPlayer("Player 1");
-    actions.addPlayer("Player 2");
-    actions.addPlayer("Player 3");
-    actions.addPlayer("Player 4");
-    actions.addPlayer("Player 5");
-    actions.setStartingPointAmount(701);
-    actions.startGame();
-    //@react-hooks/exhaustive-deps
-  }, [actions]);
-
   return (
     <main className="flex h-[100svh] flex-col mx-auto items-center gap-6 justify-center container p-3">
       <h1 className="text-5xl font-extrabold text-white">Darts</h1>
       {hasGameStarted ? (
         <>
-          {/* TODO: change to scrollarea */}
-          <div className="flex flex-col w-full gap-2 overflow-y-auto">
+          <ScrollArea className="w-full">
             {players.map((player) => (
               <PlayerDisplay
                 player={player}
@@ -84,7 +78,8 @@ const Game: FC = () => {
                 isCurrentPlayer={currentPlayer?.id === player.id}
               />
             ))}
-          </div>
+            <Scrollbar orientation="vertical" />
+          </ScrollArea>
           <Keyboard />
         </>
       ) : (
@@ -94,6 +89,7 @@ const Game: FC = () => {
             <div className="flex flex-col gap-2 w-full">
               <Label htmlFor="startingScore">Starting score</Label>
               <Select
+                onOpenChange={toggleSelectOpen}
                 name="startingScore"
                 value={startingPointAmount.toString()}
                 onValueChange={(newValue) =>
@@ -116,6 +112,7 @@ const Game: FC = () => {
             <div className="flex flex-col gap-2 w-full">
               <Label htmlFor="endingStrategy">Ending strategy</Label>
               <Select
+                onOpenChange={toggleSelectOpen}
                 name="endingStrategy"
                 value={endingStrategy}
                 onValueChange={actions.setEndingStrategy}
@@ -132,6 +129,7 @@ const Game: FC = () => {
             <div className="flex flex-col gap-2 w-full">
               <Label htmlFor="sets">Best of ...</Label>
               <Select
+                onOpenChange={toggleSelectOpen}
                 name="sets"
                 value={sets.toString()}
                 onValueChange={(newValue) =>
@@ -151,9 +149,10 @@ const Game: FC = () => {
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex flex-col gap-2 w-full">
+            <div className="flex flex-col gap-2 w-full text-base">
               <Label htmlFor="legs">Best of ...</Label>
               <Select
+                onOpenChange={toggleSelectOpen}
                 name="legs"
                 value={legs.toString()}
                 onValueChange={(newValue) =>
@@ -161,12 +160,16 @@ const Game: FC = () => {
                   actions.setLegs(parseInt(newValue))
                 }
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full text-base">
                   <SelectValue placeholder="Legs" />
                 </SelectTrigger>
                 <SelectContent className="max-h-72">
                   {LEGS_POSSIBILITIES.map((value) => (
-                    <SelectItem key={value} value={value.toString()}>
+                    <SelectItem
+                      key={value}
+                      value={value.toString()}
+                      className="text-base"
+                    >
                       {value === 1 ? "1 leg" : `${value} legs`}
                     </SelectItem>
                   ))}
@@ -188,40 +191,18 @@ const Game: FC = () => {
               <Separator />
             </div>
           ))}
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button>Add player</Button>
-            </SheetTrigger>
-            <SheetContent
-              side="bottom"
-              className="flex flex-col gap-5 border-slate-600 rounded-t-md shadow-md"
-            >
-              <SheetHeader>
-                <SheetTitle>Add new player</SheetTitle>
-              </SheetHeader>
-              <Input
-                placeholder="Player name"
-                ref={newPlayerInputRef}
-                autoFocus
-              />
-
-              <SheetFooter>
-                <SheetClose asChild>
-                  <Button
-                    type="button"
-                    className="self-end"
-                    onClick={() =>
-                      // TODO: add validation
-                      newPlayerInputRef.current &&
-                      actions.addPlayer(newPlayerInputRef.current.value)
-                    }
-                  >
-                    Add
-                  </Button>
-                </SheetClose>
-              </SheetFooter>
-            </SheetContent>
-          </Sheet>
+          <div
+            className={cn(
+              "flex flex-col gap-2 w-full ",
+              pointerEventsDebounced
+                ? "pointer-events-none"
+                : "pointer-events-auto"
+            )}
+          >
+            <AddPlayerSheet side="bottom" />
+            <AddPlayerSheet side="top" />
+            <AddPlayerDrawer />
+          </div>
 
           {!players.length && <div>No players added yet</div>}
 
