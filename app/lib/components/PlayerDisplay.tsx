@@ -1,7 +1,9 @@
+"use client";
+
+import { BatchOfThrows, Player } from "@/app/lib/types";
 import { getPointsScoredInBatch, throwValueToString } from "@/app/lib/utils";
 import { cn } from "@/lib/utils";
 import { useThrowCount } from "@/store/GameProvider";
-import { BatchOfThrows, Player } from "@/store/gameStore";
 import { FC, useEffect, useMemo, useRef } from "react";
 
 const PlayerDisplay: FC<{
@@ -54,19 +56,19 @@ const PlayerDisplay: FC<{
         <h2 className="text-white text-4xl font-extrabold leading-none">
           {player.remainingScore}
         </h2>
-        <h3 className="text-slate-500 text-sm leading-4 min-w-0 line-clamp-2 text-center text-ellipsis">
+        <h3 className="text-slate-500 text-base leading-4 min-w-0 line-clamp-2 text-center text-ellipsis">
           {player.name}
         </h3>
       </div>
       <div className="flex flex-col gap-3 flex-1 justify-start items-center">
         <div className="flex gap-0.5 items-center justify-center">
-          <div className="rounded-md text-sm bg-slate-900 shadow-inner size-9 grow-0 flex items-center justify-center text-white font-semibold leading-none">
+          <div className="rounded-md text-base bg-slate-900 shadow-inner size-9 grow-0 flex items-center justify-center text-white font-semibold leading-none">
             {throwValueToString(currentBatch.throw1?.throwValue ?? null)}
           </div>
-          <div className="rounded-md text-sm bg-slate-900 shadow-inner size-9 grow-0 flex items-center justify-center text-white font-semibold leading-none">
+          <div className="rounded-md text-base bg-slate-900 shadow-inner size-9 grow-0 flex items-center justify-center text-white font-semibold leading-none">
             {throwValueToString(currentBatch.throw2?.throwValue ?? null)}
           </div>
-          <div className="rounded-md text-sm bg-slate-900 shadow-inner size-9 grow-0 flex items-center justify-center text-white font-semibold leading-none">
+          <div className="rounded-md text-base bg-slate-900 shadow-inner size-9 grow-0 flex items-center justify-center text-white font-semibold leading-none">
             {throwValueToString(currentBatch.throw3?.throwValue ?? null)}
           </div>
         </div>
@@ -74,7 +76,7 @@ const PlayerDisplay: FC<{
           {pointsScoredInBatch}
         </p>
       </div>
-      <div className="flex flex-col justify-between items-center gap-2 flex-1 text-slate-500 text-sm font-normal">
+      <div className="flex flex-col justify-between items-center gap-2 flex-1 text-slate-500 text-base font-normal">
         <p>sets legs</p>
         <p>darts used</p>
         <p>average</p>
