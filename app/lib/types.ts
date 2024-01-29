@@ -27,3 +27,37 @@ export type SegmentValue =
     };
 
 export type ThrowValue = SegmentValue | "MISS";
+
+export type BatchOfThrows = {
+  busted: boolean;
+  id: string;
+  throw1: ThrowResult | null;
+  throw2: ThrowResult | null;
+  throw3: ThrowResult | null;
+};
+
+export type Player = {
+  name: string;
+  history: BatchOfThrows[];
+  id: string;
+  legsWon: number;
+  setsWon: number;
+};
+
+export type ThrowResult = {
+  scoredByPlayer: string;
+  throwValue: ThrowValue;
+  id: string;
+};
+
+export type GameState = {
+  startingPointAmount: StartingPointAmount;
+  endingStrategy: Ending;
+  players: Player[];
+  savedResultsStack: ThrowResult[];
+  redoResultsStack: ThrowResult[];
+  legs: LegsAmount;
+  sets: SetsAmount;
+  hasGameStarted: boolean;
+  currentPlayerIndex: number;
+};
