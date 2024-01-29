@@ -1,12 +1,13 @@
 import {
+  BatchOfThrows,
   Ending,
+  GameState,
   LegsAmount,
   SetsAmount,
   StartingPointAmount,
-  ThrowValue,
+  ThrowResult,
 } from "@/app/lib/types";
 import { getPointsScoredInBatch } from "@/app/lib/utils";
-import { toast } from "sonner";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
@@ -22,49 +23,15 @@ const playerIdGenerator = idGenerator("player");
 const throwIdGenerator = idGenerator("throw");
 const batchOfThrowsIdGenerator = idGenerator("batchOfThrows");
 
-export type BatchOfThrows = {
-  busted: boolean;
-  id: string;
-  throw1: ThrowResult | null;
-  throw2: ThrowResult | null;
-  throw3: ThrowResult | null;
-};
-
-export type Player = {
-  name: string;
-  history: BatchOfThrows[];
-  id: string;
-  legsWon: number;
-  setsWon: number;
-};
-
-type ThrowResult = {
-  scoredByPlayer: string;
-  throwValue: ThrowValue;
-  id: string;
-};
-
-type TState = {
-  startingPointAmount: StartingPointAmount;
-  endingStrategy: Ending;
-  players: Player[];
-  savedResultsStack: ThrowResult[];
-  redoResultsStack: ThrowResult[];
-  legs: LegsAmount;
-  sets: SetsAmount;
-  hasGameStarted: boolean;
-  currentPlayerIndex: number;
-};
-
-type TActions = {
+type GameActions = {
   reset(): void;
   startGame(): void;
   addPlayer(name: string): void;
   removePlayer(playerId: string): void;
-  setEndingStrategy(strategy: TState["endingStrategy"]): void;
-  setLegs(legs: TState["legs"]): void;
-  setSets(sets: TState["sets"]): void;
-  setStartingPointAmount(amount: TState["startingPointAmount"]): void;
+  setEndingStrategy(strategy: Ending): void;
+  setLegs(legs: LegsAmount): void;
+  setSets(sets: SetsAmount): void;
+  setStartingPointAmount(amount: StartingPointAmount): void;
   saveThrow(result: Omit<ThrowResult, "id" | "resultedInBust">): boolean;
   undoThrow(): void;
   redoThrow(): void;
@@ -74,7 +41,7 @@ type TActions = {
   getScoredPointsOfPlayer(playerId: string): number;
 };
 
-const initialState: TState = {
+const initialState: GameState = {
   startingPointAmount: 501,
   players: [],
   savedResultsStack: [],
@@ -87,7 +54,7 @@ const initialState: TState = {
 };
 
 export const createGameStore = () =>
-  create<TState & { actions: TActions }>()(
+  create<GameState & { actions: GameActions }>()(
     devtools(
       // persist( //TODO re-enable middleware after the store's development is finished
       immer((set, get) => ({
@@ -98,13 +65,12 @@ export const createGameStore = () =>
             localStorage.removeItem("Game Store");
           },
           startGame: () => {
-            toast("Game Started", {
-              duration: 5000,
-              position: "bottom-right",
-              dismissible: true,
-            });
-
             if (!get().players.length) return;
+            // toast("Game Started", {
+            //   duration: 5000,
+            //   position: "bottom-right",
+            //   dismissible: true,
+            // });
             set(
               (state) => {
                 state.hasGameStarted = true;
