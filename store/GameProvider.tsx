@@ -24,6 +24,9 @@ export const useGameStore = () => {
 export const useThrowCount = () =>
   useGameStore()(useCallback((store) => store.savedResultsStack.length, []));
 
+export const useCanStartGame = () =>
+  useGameStore()(useCallback((store) => Boolean(store.players.length), []));
+
 export const useGameActions = () =>
   useGameStore()(useCallback((store) => store.actions, []));
 
