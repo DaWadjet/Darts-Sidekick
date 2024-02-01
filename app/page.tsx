@@ -10,7 +10,7 @@ const Game: FC = () => {
     useCallback((store) => store.hasGameStarted, [])
   );
   return (
-    <main className="flex h-[100svh] flex-col mx-auto items-center gap-10 container p-3">
+    <main className="flex h-[100svh] flex-col mx-auto items-center gap-10 container py-3 px-5">
       {hasGameStarted ? <Game /> : <GameStarterForm />}
     </main>
   );
