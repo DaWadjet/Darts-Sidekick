@@ -1,5 +1,6 @@
 "use client";
 
+import GameHeader from "@/app/lib/components/GameHeader";
 import Keyboard from "@/app/lib/components/Keyboard";
 import PlayerDisplay from "@/app/lib/components/PlayerDisplay";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
@@ -10,8 +11,9 @@ const Game: FC = () => {
   const currentPlayer = useCurrentPlayer();
   const players = usePlayers();
   return (
-    <>
-      <ScrollArea className="w-full">
+    <div className="flex flex-col w-full gap-4 min-h-0 h-full">
+      <GameHeader />
+      <ScrollArea className="w-full h-full min-h-0">
         {players.map((player) => (
           <PlayerDisplay
             player={player}
@@ -22,7 +24,7 @@ const Game: FC = () => {
         <ScrollBar />
       </ScrollArea>
       <Keyboard />
-    </>
+    </div>
   );
 };
 

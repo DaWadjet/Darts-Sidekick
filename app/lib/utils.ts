@@ -11,6 +11,12 @@ export const throwValueToString = (throwValue: ThrowValue | null) => {
   }${throwValue.segment}`;
 };
 
+export const vibrate = () => {
+  if (typeof window !== "undefined" && "vibrate" in window.navigator) {
+    window.navigator.vibrate(100);
+  }
+};
+
 export const getPointsScoredWithThrow = (
   throwResult: ThrowValue | null | undefined
 ) => {
@@ -28,6 +34,8 @@ export const getPointsScoredWithThrow = (
   return 0;
 };
 
+export type PossibleCheckout = keyof typeof cheatSheet;
+
 export const getPointsScoredInBatch = (batch: BatchOfThrows) =>
   batch.busted
     ? 0
@@ -36,14 +44,322 @@ export const getPointsScoredInBatch = (batch: BatchOfThrows) =>
       getPointsScoredWithThrow(batch.throw3?.throwValue);
 
 export const suggestDoubleOutPath = (
-  startingPoint: keyof typeof cheatSheet
+  startingPoint: PossibleCheckout,
+  remainingThrows: 1 | 2 | 3
 ) => {
   const path = cheatSheet[startingPoint];
-  if (!path) return "None";
+  if (!path || path.length > remainingThrows)
+    return `No ${remainingThrows}-dart finish available`;
   return path.map(throwValueToString).join(" -> ");
 };
 
+export function canPossiblyDoubleOut(
+  number: number
+): number is PossibleCheckout {
+  return number >= 2 && number <= 170;
+}
+
 const cheatSheet = {
+  2: [
+    {
+      segment: 1,
+      multiplier: 2,
+    },
+  ],
+  3: [
+    {
+      segment: 1,
+      multiplier: 1,
+    },
+    {
+      segment: 1,
+      multiplier: 2,
+    },
+  ],
+  4: [
+    {
+      segment: 2,
+      multiplier: 2,
+    },
+  ],
+  5: [
+    {
+      segment: 3,
+      multiplier: 1,
+    },
+    {
+      segment: 1,
+      multiplier: 2,
+    },
+  ],
+  6: [
+    {
+      segment: 3,
+      multiplier: 2,
+    },
+  ],
+  7: [
+    {
+      segment: 5,
+      multiplier: 1,
+    },
+    {
+      segment: 1,
+      multiplier: 2,
+    },
+  ],
+  8: [
+    {
+      segment: 4,
+      multiplier: 2,
+    },
+  ],
+  9: [
+    {
+      segment: 7,
+      multiplier: 1,
+    },
+    {
+      segment: 1,
+      multiplier: 2,
+    },
+  ],
+  10: [
+    {
+      segment: 5,
+      multiplier: 2,
+    },
+  ],
+  11: [
+    {
+      segment: 9,
+      multiplier: 1,
+    },
+    {
+      segment: 1,
+      multiplier: 2,
+    },
+  ],
+  12: [
+    {
+      segment: 6,
+      multiplier: 2,
+    },
+  ],
+  13: [
+    {
+      segment: 11,
+      multiplier: 1,
+    },
+    {
+      segment: 1,
+      multiplier: 2,
+    },
+  ],
+  14: [
+    {
+      segment: 7,
+      multiplier: 2,
+    },
+  ],
+  15: [
+    {
+      segment: 13,
+      multiplier: 1,
+    },
+    {
+      segment: 1,
+      multiplier: 2,
+    },
+  ],
+  16: [
+    {
+      segment: 8,
+      multiplier: 2,
+    },
+  ],
+  17: [
+    {
+      segment: 15,
+      multiplier: 1,
+    },
+    {
+      segment: 1,
+      multiplier: 2,
+    },
+  ],
+  18: [
+    {
+      segment: 9,
+      multiplier: 2,
+    },
+  ],
+  19: [
+    {
+      segment: 17,
+      multiplier: 1,
+    },
+    {
+      segment: 1,
+      multiplier: 2,
+    },
+  ],
+  20: [
+    {
+      segment: 10,
+      multiplier: 2,
+    },
+  ],
+  21: [
+    {
+      segment: 19,
+      multiplier: 1,
+    },
+    {
+      segment: 1,
+      multiplier: 2,
+    },
+  ],
+  22: [
+    {
+      segment: 11,
+      multiplier: 2,
+    },
+  ],
+
+  23: [
+    {
+      segment: 19,
+      multiplier: 1,
+    },
+    {
+      segment: 2,
+      multiplier: 2,
+    },
+  ],
+  24: [
+    {
+      segment: 12,
+      multiplier: 2,
+    },
+  ],
+  25: [
+    {
+      segment: 19,
+      multiplier: 1,
+    },
+    {
+      segment: 3,
+      multiplier: 2,
+    },
+  ],
+  26: [{ segment: 13, multiplier: 2 }],
+  27: [
+    {
+      segment: 19,
+      multiplier: 1,
+    },
+    {
+      segment: 4,
+      multiplier: 2,
+    },
+  ],
+  28: [
+    {
+      segment: 14,
+      multiplier: 2,
+    },
+  ],
+  29: [
+    {
+      segment: 19,
+      multiplier: 1,
+    },
+    {
+      segment: 5,
+      multiplier: 2,
+    },
+  ],
+  30: [
+    {
+      segment: 15,
+      multiplier: 2,
+    },
+  ],
+  31: [
+    {
+      segment: 19,
+      multiplier: 1,
+    },
+    {
+      segment: 6,
+      multiplier: 2,
+    },
+  ],
+  32: [
+    {
+      segment: 16,
+      multiplier: 2,
+    },
+  ],
+  33: [
+    {
+      segment: 19,
+      multiplier: 1,
+    },
+    {
+      segment: 7,
+      multiplier: 2,
+    },
+  ],
+  34: [
+    {
+      segment: 17,
+      multiplier: 2,
+    },
+  ],
+  35: [
+    {
+      segment: 19,
+      multiplier: 1,
+    },
+    {
+      segment: 8,
+      multiplier: 2,
+    },
+  ],
+  36: [
+    {
+      segment: 18,
+      multiplier: 2,
+    },
+  ],
+  37: [
+    {
+      segment: 19,
+      multiplier: 1,
+    },
+    {
+      segment: 9,
+      multiplier: 2,
+    },
+  ],
+  38: [
+    {
+      segment: 19,
+      multiplier: 2,
+    },
+  ],
+  39: [
+    {
+      segment: 19,
+      multiplier: 1,
+    },
+    {
+      segment: 10,
+      multiplier: 2,
+    },
+  ],
   40: [
     {
       segment: 20,

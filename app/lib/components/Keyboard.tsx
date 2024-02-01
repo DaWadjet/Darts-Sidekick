@@ -3,30 +3,22 @@
 import { Multiplier, SEGMENTS } from "@/app/lib/types";
 import { cn } from "@/lib/utils";
 import {
-  useCanRedo,
-  useCanUndo,
   useCurrentPlayer,
   useGameActions,
+  useGameStore,
 } from "@/store/GameProvider";
 import { FC, useCallback, useMemo, useState } from "react";
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import CheckoutSuggestion from "@/app/lib/components/CheckoutSuggestion";
+import { vibrate } from "@/app/lib/utils";
 
 const Keyboard: FC = () => {
-  const actions = useGameActions();
+  const isDoubleOut = useGameStore()(
+    useCallback((state) => state.endingStrategy === "DOUBLE_OUT", [])
+  );
+  const saveThrow = useGameActions().saveThrow;
+  const currentPlayer = useCurrentPlayer();
   const [multiplier, setMultiplier] = useState<Multiplier>(1);
-  const canRedo = useCanRedo();
-  const canUndo = useCanUndo();
   const possibleValues = useMemo(
     () => SEGMENTS.slice().sort((a, b) => a - b),
     []
@@ -35,24 +27,18 @@ const Keyboard: FC = () => {
     () => (multiplier === 1 ? "" : multiplier === 2 ? "D" : "T"),
     [multiplier]
   );
-  const currentPlayer = useCurrentPlayer();
-
-  const vibrate = useCallback(() => {
-    if (typeof window !== "undefined" && "vibrate" in window.navigator) {
-      window.navigator.vibrate(100);
-    }
-  }, []);
 
   return (
-    <div className="w-full">
-      <div className="grid grid-cols-7 gap-1">
+    <>
+      {isDoubleOut && <CheckoutSuggestion />}
+      <div className="grid grid-cols-6 gap-1 w-full">
         {possibleValues.map((segment) => (
           <button
             key={segment}
             className="bg-slate-800 rounded-sm aspect-square text-white font-semibold text-base leading-0"
             onClick={() => {
               vibrate();
-              actions.saveThrow({
+              saveThrow({
                 scoredByPlayer: currentPlayer.id,
                 throwValue: {
                   segment,
@@ -71,7 +57,7 @@ const Keyboard: FC = () => {
             className="bg-slate-800 rounded-sm aspect-square text-white font-semibold text-base leading-0"
             onClick={() => {
               vibrate();
-              actions.saveThrow({
+              saveThrow({
                 scoredByPlayer: currentPlayer.id,
                 throwValue: {
                   segment: "OUTER_BULL",
@@ -88,7 +74,7 @@ const Keyboard: FC = () => {
             className="bg-slate-800 rounded-sm aspect-square text-white font-semibold text-base leading-0"
             onClick={() => {
               vibrate();
-              actions.saveThrow({
+              saveThrow({
                 scoredByPlayer: currentPlayer.id,
                 throwValue: {
                   segment: "BULLSEYE",
@@ -106,7 +92,7 @@ const Keyboard: FC = () => {
           className="bg-slate-800 rounded-sm aspect-square text-white font-semibold text-base leading-0"
           onClick={() => {
             vibrate();
-            actions.saveThrow({
+            saveThrow({
               scoredByPlayer: currentPlayer.id,
               throwValue: "MISS",
             });
@@ -147,60 +133,8 @@ const Keyboard: FC = () => {
         >
           x3
         </button>
-        <button
-          disabled={!canUndo}
-          className="bg-orange-700 rounded-sm aspect-square text-white font-semibold transition-all duration-200 text-base leading-0 disabled:opacity-50 disabled:cursor-not-allowed"
-          onClick={() => {
-            vibrate();
-            actions.undoThrow();
-          }}
-        >
-          Undo
-        </button>
-        {canRedo ? (
-          <button
-            className="bg-green-700 rounded-sm aspect-square text-white font-semibold transition-all duration-200 text-base leading-0"
-            onClick={() => {
-              vibrate();
-              actions.redoThrow();
-            }}
-          >
-            Redo
-          </button>
-        ) : (
-          <div />
-        )}
-        <div />
-        <AlertDialog>
-          <AlertDialogTrigger
-            className="bg-red-800 rounded-sm aspect-square text-white font-semibold text-base leading-0"
-            onClick={vibrate}
-          >
-            Reset
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-              <AlertDialogDescription>
-                This action will remove all players and all throws. Do you want
-                to continue?
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={() => {
-                  vibrate();
-                  actions.reset();
-                }}
-              >
-                Continue
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
       </div>
-    </div>
+    </>
   );
 };
 

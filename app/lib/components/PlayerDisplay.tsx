@@ -52,16 +52,22 @@ const PlayerDisplay: FC<{
           isCurrentPlayer ? "bg-green-500" : "bg-slate-800"
         )}
       />
-      <div className="flex flex-col justify-around items-center flex-1 h-full">
-        <h2 className="text-white text-4xl font-extrabold leading-none">
+      <div className="flex flex-col justify-between items-center flex-1 h-full">
+        <h2
+          className={cn(
+            "text-white h-9 transition-all duration-150 font-extrabold leading-none",
+            player.remainingScore > 999 ? "text-3xl" : "text-4xl"
+          )}
+        >
           {player.remainingScore}
         </h2>
-        <h3 className="text-slate-500 text-base leading-4 min-w-0 line-clamp-2 text-center text-ellipsis">
+
+        <h3 className="px-1 text-slate-500 min-w-0 break-words whitespace-pre-wrap break-all flex items-center justify-center h-10 leading-5 line-clamp-2 text-center text-ellipsis">
           {player.name}
         </h3>
       </div>
       <div className="flex flex-col gap-3 flex-1 justify-start items-center">
-        <div className="flex gap-0.5 items-center justify-center">
+        <div className="flex gap-1 items-center justify-center">
           <div className="rounded-md text-base bg-slate-900 shadow-inner size-9 grow-0 flex items-center justify-center text-white font-semibold leading-none">
             {throwValueToString(currentBatch.throw1?.throwValue ?? null)}
           </div>
