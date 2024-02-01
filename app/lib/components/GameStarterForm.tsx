@@ -9,7 +9,7 @@ import { FC } from "react";
 
 const GameStarterForm: FC = () => {
   return (
-    <div className="flex flex-col gap-6 w-full px-4 justify-between h-full items-stretch pt-8 pb-4">
+    <div className="flex flex-col gap-8 w-full justify-between h-full items-stretch pt-6 pb-4">
       <h1 className="text-4xl font-extrabold text-white text-center">
         Darts Sidekick
       </h1>

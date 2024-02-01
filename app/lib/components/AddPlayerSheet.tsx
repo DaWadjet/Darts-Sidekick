@@ -3,17 +3,23 @@
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
   Sheet,
-  SheetClose,
   SheetContent,
   SheetFooter,
   SheetHeader,
@@ -21,34 +27,31 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useGameActions } from "@/store/GameProvider";
-import { FC } from "react";
+import { FC, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { useMedia, useToggle } from "react-use";
 
 const AddPlayerSheet: FC = () => {
-  const {
-    register,
-    handleSubmit,
-    resetField,
-    formState: { errors },
-  } = useForm<{ nickname: string }>({
+  const [open, toggleOpen] = useToggle(false);
+  const isDesktop = useMedia("(min-width: 768px)", true);
+  const form = useForm<{ firstName: string }>({
     resolver: (data) => {
-      if (!data.nickname?.trim()) {
+      if (!data.firstName?.trim()) {
         return {
           values: {},
           errors: {
-            nickname: {
+            firstName: {
               type: "required",
               message: "Player name is required",
             },
           },
         };
       }
-      if (data.nickname.length > 16) {
+      if (data.firstName.length > 16) {
         return {
           values: {},
           errors: {
-            nickname: {
+            firstName: {
               type: "maxLength",
               message: "Player name is too long",
             },
@@ -63,8 +66,14 @@ const AddPlayerSheet: FC = () => {
   });
   const addPlayer = useGameActions().addPlayer;
 
-  const [open, toggleOpen] = useToggle(false);
-  const isDesktop = useMedia("(min-width: 768px)", true);
+  const onSubmit = useCallback(
+    (data: { firstName: string }) => {
+      addPlayer(data.firstName);
+      toggleOpen(false);
+      form.reset();
+    },
+    [addPlayer, toggleOpen, form]
+  );
 
   if (isDesktop) {
     return (
@@ -72,37 +81,39 @@ const AddPlayerSheet: FC = () => {
         <DialogTrigger asChild>
           <Button>Add player</Button>
         </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px] flex flex-col justify-start items-start px-6 pb-8 gap-4">
-          <DialogHeader>
-            <DialogTitle>Add new Player</DialogTitle>
-          </DialogHeader>
-          <Input
-            placeholder="Player name"
-            className="w-full"
-            {...register("nickname")}
-            autoFocus
-          />
-          <DialogFooter className="flex items-start justify-between w-full">
-            {!!errors.nickname ? (
-              <span className="text-red-600 text-base leading-none">
-                {errors.nickname.message}
-              </span>
-            ) : (
-              <div />
-            )}
-            <DialogClose asChild>
-              <Button
-                className="self-end"
-                onClick={handleSubmit((data) => {
-                  addPlayer(data.nickname);
-                  toggleOpen(false);
-                  resetField("nickname");
-                })}
-              >
-                Add
-              </Button>
-            </DialogClose>
-          </DialogFooter>
+        <DialogContent className="sm:max-w-[425px] px-6 pb-8">
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="flex flex-col justify-start items-start"
+            >
+              <DialogHeader>
+                <DialogTitle>Add new Player</DialogTitle>
+              </DialogHeader>
+              <FormField
+                control={form.control}
+                name="firstName"
+                defaultValue=""
+                render={({ field }) => (
+                  <FormItem className="w-full">
+                    <FormControl>
+                      <Input
+                        placeholder="Player name"
+                        className="mb-4 mt-6"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <DialogFooter className="w-full">
+                <Button type="submit" className="ml-auto">
+                  Add
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
         </DialogContent>
       </Dialog>
     );
@@ -115,34 +126,40 @@ const AddPlayerSheet: FC = () => {
       </SheetTrigger>
       <SheetContent
         side="top"
-        className="flex flex-col gap-5  rounded-b-md shadow-md"
+        className="flex flex-col gap-5 border-slate-700 shadow-md"
       >
-        <SheetHeader>
-          <SheetTitle>Add new player</SheetTitle>
-        </SheetHeader>
-        <Input placeholder="Player name" {...register("nickname")} />
-
-        <SheetFooter className="flex items-start flex-row justify-between w-full">
-          {!!errors.nickname ? (
-            <span className="text-red-600 text-base leading-none">
-              {errors.nickname.message}
-            </span>
-          ) : (
-            <div />
-          )}
-          <SheetClose asChild>
-            <Button
-              type="button"
-              onClick={handleSubmit((data) => {
-                addPlayer(data.nickname);
-                resetField("nickname");
-                toggleOpen(false);
-              })}
-            >
-              Add
-            </Button>
-          </SheetClose>
-        </SheetFooter>
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="flex flex-col justify-start items-start"
+          >
+            <SheetHeader>
+              <SheetTitle>Add new player</SheetTitle>
+            </SheetHeader>
+            <FormField
+              control={form.control}
+              name="firstName"
+              defaultValue=""
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormControl>
+                    <Input
+                      placeholder="Player name"
+                      className="mb-4 mt-6"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <SheetFooter className="w-full">
+              <Button type="submit" className="ml-auto">
+                Add
+              </Button>
+            </SheetFooter>
+          </form>
+        </Form>
       </SheetContent>
     </Sheet>
   );
