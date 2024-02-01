@@ -1,5 +1,6 @@
 "use client";
 
+import { BatchOfThrows } from "@/app/lib/types";
 import { createGameStore } from "@/store/gameStore";
 import {
   FC,
@@ -61,6 +62,38 @@ export const useCurrentPlayer = () => {
   );
 
   return players[playerIndex];
+};
+
+export const useCurrentBatch = () => {
+  const throwCount = useThrowCount();
+  const currentPlayer = useCurrentPlayer();
+  const currentBatch = useMemo<BatchOfThrows>(
+    () =>
+      currentPlayer.history.length
+        ? currentPlayer.history[currentPlayer.history.length - 1]
+        : {
+            throw1: null,
+            throw2: null,
+            throw3: null,
+            id: "dummybatch",
+            busted: false,
+          },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [currentPlayer.history, throwCount]
+  );
+  return currentBatch;
+};
+
+export const useRemainingThrows = () => {
+  const currentBatch = useCurrentBatch();
+  return useMemo(
+    () =>
+      (3 -
+        (currentBatch.throw1 ? 1 : 0) -
+        (currentBatch.throw2 ? 1 : 0) -
+        (currentBatch.throw3 ? 1 : 0)) as 1 | 2 | 3 | 0,
+    [currentBatch]
+  );
 };
 
 export const useCanRedo = () =>

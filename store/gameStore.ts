@@ -8,6 +8,7 @@ import {
   ThrowResult,
 } from "@/app/lib/types";
 import { getPointsScoredInBatch } from "@/app/lib/utils";
+import { toast } from "sonner";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
@@ -66,11 +67,11 @@ export const createGameStore = () =>
           },
           startGame: () => {
             if (!get().players.length) return;
-            // toast("Game Started", {
-            //   duration: 5000,
-            //   position: "bottom-right",
-            //   dismissible: true,
-            // });
+            toast("Game Started", {
+              duration: 5000,
+              position: "bottom-right",
+              dismissible: true,
+            });
             set(
               (state) => {
                 state.hasGameStarted = true;
