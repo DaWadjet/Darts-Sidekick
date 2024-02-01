@@ -13,7 +13,7 @@ import {
 } from "@/store/GameProvider";
 import { useAtomValue, useStore } from "jotai";
 import { FC, useEffect, useRef } from "react";
-import { useDebounce, useToggle } from "react-use";
+import { useDebounce, usePrevious, useToggle } from "react-use";
 
 const PlayersList: FC = () => {
   const store = useStore();
@@ -31,9 +31,12 @@ const PlayersList: FC = () => {
     50,
     [isSelectOpen]
   );
+
+  const previousPlayersLength = usePrevious(players.length);
   useEffect(() => {
-    scrollRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [players.length]);
+    if (players.length > (previousPlayersLength ?? 0))
+      scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [players.length, previousPlayersLength]);
 
   return (
     <div
@@ -50,12 +53,12 @@ const PlayersList: FC = () => {
       ) : (
         <ScrollArea className="flex flex-col w-full gap-4 h-full overflow-y-aut0">
           {players.map((player) => (
-            <div key={player.id} className="flex flex-col gap-1.5 w-full">
+            <div key={player.id} className="flex flex-col gap-1.5 w-full px-2">
               <div className="gap-1 w-full items-center justify-between flex pt-1.5">
                 <h3 className="font-semibold">{player.name}</h3>
                 <Button
                   variant="ghost"
-                  className="text-red-500 text-xs"
+                  className="text-red-500 pr-2 hover:text-red-300 hover:dark:text-red-300 text-xs hover:bg-transparent hover:dark:bg-transparent"
                   onClick={() => actions.removePlayer(player.id)}
                 >
                   Remove
