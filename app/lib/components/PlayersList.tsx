@@ -52,7 +52,7 @@ const PlayersList: FC = () => {
         </div>
       ) : (
         <ScrollArea className="flex flex-col w-full gap-4 h-full overflow-y-aut0">
-          {players.map((player) => (
+          {players.map((player, idx, list) => (
             <div key={player.id} className="flex flex-col gap-1.5 w-full px-2">
               <div className="gap-1 w-full items-center justify-between flex pt-1.5">
                 <h3 className="font-semibold">{player.name}</h3>
@@ -64,7 +64,7 @@ const PlayersList: FC = () => {
                   Remove
                 </Button>
               </div>
-              <Separator />
+              {idx !== list.length - 1 && <Separator />}
             </div>
           ))}
           <ScrollBar />
