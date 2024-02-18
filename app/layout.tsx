@@ -3,9 +3,12 @@ import { ThemeProvider } from "@/components/ui/theme-provider";
 import { cn } from "@/lib/utils";
 import GameProvider from "@/store/GameProvider";
 import JotaiStoreProvider from "@/store/JotaiStoreProvider";
+import { config } from "@fortawesome/fontawesome-svg-core";
+import "@fortawesome/fontawesome-svg-core/styles.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+config.autoAddCss = false;
 
 const inter = Inter({ subsets: ["latin"] });
 

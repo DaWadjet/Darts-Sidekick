@@ -25,7 +25,7 @@ const GameHeader: FC = () => {
   }, [actions]);
 
   return (
-    <div className="flex items-center justify-between w-full">
+    <div className="flex items-center justify-between w-full pr-10">
       <div className="flex gap-1 justify-start">
         <button
           disabled={!canUndo}
