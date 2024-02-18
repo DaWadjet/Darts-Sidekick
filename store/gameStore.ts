@@ -122,9 +122,15 @@ export const createGameStore = () =>
                 ...result,
                 id: newId.value!,
               };
-              set((state) => {
-                state.savedResultsStack.push(throwResult);
-              });
+              set(
+                (state) => {
+                  state.savedResultsStack.push(throwResult);
+                  state.redoResultsStack = [];
+                },
+                false,
+                "saveThrow"
+              );
+
               get().actions.saveThrowToPlayerHistory(throwResult);
               return get().actions.checkLegWinCondition();
             },
