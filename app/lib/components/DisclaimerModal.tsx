@@ -9,6 +9,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { faDev } from "@fortawesome/free-brands-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { FC, useEffect } from "react";
 import { useLocalStorage, useToggle } from "react-use";
 
@@ -34,7 +36,11 @@ const DisclaimerModal: FC = () => {
           <AlertDialogDescription>
             This application is currently under development👩‍💻, and may contain
             bugs. If you find any, please report them through the top right
-            banner 🍌
+            <FontAwesomeIcon
+              icon={faDev}
+              className="text-amber-600 size-5 px-1"
+            />
+            button
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

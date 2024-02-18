@@ -11,31 +11,20 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import { faDev } from "@fortawesome/free-brands-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { FC } from "react";
 
 const ReportIssueBanner: FC = () => {
   return (
     <AlertDialog>
       <AlertDialogTrigger
-        className="absolute top-0 right-0 overflow-clip size-14"
+        className="absolute top-1 right-1 overflow-clip size-10"
         onClick={vibrate}
         asChild
       >
-        <div className="pl-3.5">
-          <div
-            className="rotate-[135deg] -mt-12 -mr-4 w-0 h-0 
-  border-t-[50px] border-t-transparent
-  border-r-[50px] border-r-orange-500
-  border-b-[50px] border-b-transparent"
-          ></div>
-          <FontAwesomeIcon
-            icon={faDev}
-            className="absolute text-black/95 top-0 right-0 size-7"
-          />
-        </div>
+        <FontAwesomeIcon icon={faDev} className="text-amber-600" />
       </AlertDialogTrigger>
       <AlertDialogContent className="w-4/5">
         <AlertDialogHeader>
