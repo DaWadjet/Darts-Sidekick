@@ -10,13 +10,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
   Sheet,
@@ -75,9 +69,17 @@ const AddPlayerSheet: FC = () => {
     [addPlayer, toggleOpen, form]
   );
 
+  const onOpenChange = useCallback(
+    (isOpen?: boolean) => {
+      toggleOpen(isOpen ?? false);
+      form.reset();
+    },
+    [toggleOpen, form]
+  );
+
   if (isDesktop) {
     return (
-      <Dialog open={open} onOpenChange={toggleOpen}>
+      <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogTrigger asChild>
           <Button>Add player</Button>
         </DialogTrigger>
@@ -103,11 +105,15 @@ const AddPlayerSheet: FC = () => {
                         {...field}
                       />
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
-              <DialogFooter className="w-full">
+              <DialogFooter className="w-full flex flex-row items-start pl-3 justify-between">
+                {!!form.formState.errors.firstName && (
+                  <span className="text-red-500 font-semibold text-sm leading-none grow">
+                    {form.formState.errors.firstName.message}
+                  </span>
+                )}
                 <Button type="submit" className="ml-auto">
                   Add
                 </Button>
@@ -120,9 +126,9 @@ const AddPlayerSheet: FC = () => {
   }
 
   return (
-    <Sheet open={open} onOpenChange={toggleOpen}>
+    <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetTrigger asChild>
-        <Button onClick={toggleOpen}>Add player</Button>
+        <Button>Add player</Button>
       </SheetTrigger>
       <SheetContent
         side="top"
@@ -149,11 +155,15 @@ const AddPlayerSheet: FC = () => {
                       {...field}
                     />
                   </FormControl>
-                  <FormMessage />
                 </FormItem>
               )}
             />
-            <SheetFooter className="w-full">
+            <SheetFooter className="w-full flex flex-row items-start pl-3 justify-between">
+              {!!form.formState.errors.firstName && (
+                <span className="text-red-500 font-semibold text-sm leading-none">
+                  {form.formState.errors.firstName.message}
+                </span>
+              )}
               <Button type="submit" className="ml-auto">
                 Add
               </Button>
