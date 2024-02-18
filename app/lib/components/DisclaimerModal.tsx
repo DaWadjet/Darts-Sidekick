@@ -38,7 +38,8 @@ const DisclaimerModal: FC = () => {
             bugs. If you find any, please report them through the top right
             <FontAwesomeIcon
               icon={faDev}
-              className="text-amber-600 size-5 px-1"
+              size="xl"
+              className="text-amber-600 px-1"
             />
             button
           </AlertDialogDescription>

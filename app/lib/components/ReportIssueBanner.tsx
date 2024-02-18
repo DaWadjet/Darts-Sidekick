@@ -20,11 +20,11 @@ const ReportIssueBanner: FC = () => {
   return (
     <AlertDialog>
       <AlertDialogTrigger
-        className="absolute top-1 right-1 overflow-clip size-10"
+        className="absolute top-1 right-1"
         onClick={vibrate}
         asChild
       >
-        <FontAwesomeIcon icon={faDev} className="text-amber-600" />
+        <FontAwesomeIcon icon={faDev} size="2x" className="text-amber-600" />
       </AlertDialogTrigger>
       <AlertDialogContent className="w-4/5">
         <AlertDialogHeader>
